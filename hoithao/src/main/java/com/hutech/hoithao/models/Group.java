@@ -23,6 +23,6 @@ public class Group {
     //ID Sport
     @Column
     private Integer id_sport; ;
-    @OneToMany(mappedBy = "rank")
+    @OneToMany(mappedBy = "group")
     private List<Team> listTeam;
 }
