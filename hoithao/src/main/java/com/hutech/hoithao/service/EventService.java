@@ -13,6 +13,7 @@ import java.util.Optional;
 public class EventService {
     @Autowired
     private EventRepository eventRepository;
+    @Autowired
     private Status_EventRepository status_eventRepository;
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
@@ -38,10 +39,10 @@ public class EventService {
     //delete event
     public void deleteEvent(@NotNull Event event) {
         Event existingEvent = eventRepository.findById(event.getId())
-                .orElseThrow(() -> new IllegalStateException("Category with ID " +
-                        event.getId() + " does not exist."));
+                .orElseThrow(() -> new IllegalStateException("Status with ID " + event.getId() + " does not exist."));
         existingEvent.setStatus(null);
-        Status_Event deletedStatus = status_eventRepository.findStatus_EventByStatusName("Đã xóa");
+        Status_Event deletedStatus = status_eventRepository.findStatus_EventByStatusName("Đã xóa")
+                .orElseThrow(() -> new IllegalStateException("Status 'Đã xóa' not found."));
         existingEvent.setStatus(deletedStatus);
         eventRepository.save(existingEvent);
     }
