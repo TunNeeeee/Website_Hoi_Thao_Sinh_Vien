@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments/head::head">
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<!-- Site wrapper -->
+<div class="wrapper">
+    <header th:replace="admin/fragments/header::header"></header>
+    <div th:replace="admin/fragments/sidebar::sidebar"></div>
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>Hội Thao Khoa Công Nghệ Thông Tin</h1>
+            <div> <a class="btn btn-success" th:href="@{/admin/add-rank}"> Thêm Mới Bảng Đấu </a></div>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <h1 class="text-center">BẢNG ĐẤU</h1>
+            <div th:each="rank : ${ranks}" class="ranking-container">
+                <h2 class="ranking-header"><span th:text="${rank.nameRank}"></span></h2>
+                <table class="ranking-table">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Tên Đội</th>
+                        <th>Số Trận</th>
+                        <th>Điểm Số</th>
+                        <th>Hiệu Số</th>
+                        <th>Trạng Thái</th>
+                        <th>Hành Động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="team : ${teamsByRank[rank.idRank]}" th:if="${teamsByRank[rank.idRank] != null}">
+                        <td th:text="${team.noRank}"></td>
+                        <td th:text="${team.teamName}"></td>
+                        <td th:text="${team.numberGame}"></td>
+                        <td th:text="${team.point}"></td>
+                        <td th:text="${team.hs}"></td>
+                        <td>
+                            <span th:if="${team.status == 0 && team.noFinal == teamCountBySport[team.sport.idSport]}" th:text="'Bị Loại'"></span>
+                            <span th:unless="${team.status == 0 && team.noFinal == teamCountBySport[team.sport.idSport]}" th:text="'Đi Tiếp'"></span>
+                        </td>
+                        <td>
+                            <div class="edit-buttons">
+                                <a th:if="${team.noRank != 2 && team.noRank != 1}"
+                                   th:href="@{/admin/eliminate-team/{idTeam}(idTeam=${team.idTeam})}"
+                                   class="btn btn-primary">Loại</a>
+                            </div>
+                        </td>
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <div class="ranking-container">
+            <h4 class="ranking-header">Đội Chưa Có Bảng Đấu</h4>
+            <table class="ranking-table">
+                <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Tên Đội</th>
+                    <th>Số Trận</th>
+                    <th>Điểm Số</th>
+                    <th>Hiệu Số</th>
+                    <th>Trạng Thái</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="team : ${unrankedTeams}">
+                    <td th:text="${team.noRank}"></td>
+                    <td th:text="${team.teamName}"></td>
+                    <td th:text="${team.numberGame}"></td>
+                    <td th:text="${team.point}"></td>
+                    <td th:text="${team.hs}"></td>
+                    <td>
+                        <span th:if="${team.noRank > 2 && team.status == 0}" th:text="'Bị Loại'"></span>
+                        <span th:unless="${team.noRank > 2 && team.status == 0}" th:text="'Đi Tiếp'"></span>
+                    </td>
+                </tr>
+                <tr th:if="${unrankedTeams.size()} == 0">
+                    <td colspan="6" class="text-center">Không có đội nào chưa xếp hạng</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+    <footer th:replace="admin/fragments/footer::footer"></footer>
+</div>
+
+<!-- ./wrapper -->
+<div th:replace="admin/fragments/script::script"></div>
+</body>
+</html>

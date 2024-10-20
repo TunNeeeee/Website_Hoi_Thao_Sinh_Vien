@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments/head::head"></head>
+<body class="hold-transition skin-blue sidebar-mini">
+<!-- Site wrapper -->
+<div class="wrapper">
+
+    <header th:replace="admin/fragments/header::header"></header>
+
+    <!-- =============================================== -->
+    <div th:replace="admin/fragments/sidebar::sidebar"></div>
+    <!-- Left side column. contains the sidebar -->
+
+    <!-- =============================================== -->
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                HỘI THAO KHOA CÔNG NGHỆ THÔNG TIN
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+                <li><a href="#">Examples</a></li>
+                <li class="active">Blank page</li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <!-- Default box -->
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Danh Sách Các Team</h3>
+                        <div> <a class="btn btn-success" th:href="@{/admin/list-team}">Xem Danh Sách Team</a></div>
+                    </div>
+                    <div class="box-tools">
+                        <form>
+                            <div class="input-group input-group-sm hidden-xs" style="width: 150px;">
+                                <input type="text" name="keyword" class="form-control pull-right" placeholder="Search" th:value="${keyword}">
+                                <div class="input-group-btn">
+                                    <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="box-body">
+                        <table class="table table-bordered">
+                            <tbody>
+                            <tr>
+                                <th style="width: 10px">ID</th>
+                                <th>Hội Thao</th>
+                                <th>Tên Môn Thi Đấu</th>
+                                <th>Tên Đội</th>
+                                <th>Tên Đội Trưởng</th>
+                                <th>Số Điện Thoại</th>
+                                <th>Trạng Thái Duyệt</th>
+
+                            </tr>
+
+                            <tr th:each="team : ${teams}">
+                                <td th:text="${team.idTeam}"></td>
+                                <td th:text="${team.sport.event.eventName}"></td> <!-- Hiển thị sự kiện -->
+                                <td th:text="${team.sport.sportName}"></td> <!-- Hiển thị tên môn thi đấu -->
+                                <td th:text="${team.teamName}"></td>
+                                <td th:text="${team.captainName}"></td>
+                                <td th:text="${team.number}"></td>
+                                <td>
+                                    <span th:if="${team.status == 0}" th:text="'Bị Loại'"></span>
+                                    <span th:if="${team.status == 1}" th:text="'Chờ duyệt'"></span>
+                                    <span th:if="${team.status == 2}" th:text="'Đã duyệt'"></span>
+                                    <span th:if="${team.status == -1}" th:text="'Không duyệt'"></span>
+                                </td>
+                                <td>
+                                    <form th:action="@{/admin/approve/{id}(id=${team.idTeam})}" method="post">
+                                        <button type="submit" class="btn btn-primary">Duyệt</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form th:action="@{/admin/remove/{id}(id=${team.idTeam})}" method="post">
+                                        <button type="submit" class="btn btn-primary">Hủy</button>
+                                    </form>
+                                </td>
+
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+    <footer th:replace="admin/fragments/footer::footer"></footer>
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery 3 -->
+<div th:replace="admin/fragments/script::script"></div>
+</body>
+</html>

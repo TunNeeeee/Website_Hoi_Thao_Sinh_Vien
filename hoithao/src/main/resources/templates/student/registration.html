@@ -1,0 +1,145 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="description" content="Team Registration Form">
+    <meta name="author" content="">
+
+    <title>Team Registration Form</title>
+
+    <!-- CSS FILES -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700;900&display=swap" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/slick.css"/>
+    <link href="css/tooplate-little-fashion.css" rel="stylesheet">
+
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="form-container">
+        <h2 class="form-title">Đăng ký hội thao</h2>
+        <form action="/student/registration/confirm" method="post">
+            <div class="mb-3">
+                <label for="event" class="form-label">Hội thao</label>
+                <select class="form-control" id="event" name="event" required>
+                    <option value="">Hãy chọn hội thao tham gia</option>
+                    <option th:each="event : ${events}"
+                            th:value="${event.idEvent}"
+                            th:text="${event.eventName}">
+                    </option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="sport" class="form-label">Môn thể thao</label>
+                <select class="form-control" id="sport" name="sport" required>
+                    <option value="">Chọn môn thể thao</option>
+                </select>
+            </div>
+            <div class="mb-3" id="sportFee" style="font-weight: bold;">
+                <!-- Sport fee will be displayed here -->
+            </div>
+            <div class="mb-3">
+                <label for="teamName" class="form-label">Tên đội đăng ký</label>
+                <input type="text" class="form-control" id="teamName" name="teamName" required>
+            </div>
+            <div class="mb-3">
+                <label for="captainName" class="form-label">Tên đội trưởng</label>
+                <input type="text" class="form-control" id="captainName" name="captainName" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="captainPhone" class="form-label">Số điện thoại</label>
+                <input type="tel" class="form-control" id="captainPhone" name="captainPhone" required>
+            </div>
+            <div class="mb-3">
+                <label for="members" class="form-label">Thành viên (Ngoài đội trưởng)</label>
+                <div id="members"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Đăng ký</button>
+        </form>
+    </div>
+</div>
+
+<!-- JavaScript Files -->
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/slick.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#event').change(function() {
+            var idEvent = $(this).val();
+            if (idEvent) {
+                $.ajax({
+                    url: '/api/sports',
+                    type: 'GET',
+                    data: {
+                        idEvent: idEvent
+                    },
+                    success: function(data) {
+                        $('#sport').empty();
+                        $('#sport').append('<option value="">Chọn môn thể thao</option>');
+                        $.each(data, function(key, sport) {
+                            $('#sport').append('<option value="' + sport.idSport + '">' + sport.sportName + '</option>');
+                        });
+                    }
+                });
+            } else {
+                $('#sport').empty();
+                $('#sport').append('<option value="">Chọn môn thể thao</option>');
+            }
+        });
+
+        $('#sport').change(function() {
+            var idSport = $(this).val();
+            if (idSport) {
+                $.ajax({
+                    url: '/api/sports/' + idSport,
+                    type: 'GET',
+                    success: function(sport) {
+                        $('#sportFee').text('Tiền phải đóng: ' + (sport.phiKyQuy + sport.phiThamGia) + ' VND');
+                        var maxMembers = sport.numberMember;
+                        var container = $('#members');
+                        container.empty();
+                        for (var i = 1; i < maxMembers; i++) {
+                            container.append(
+                                '<div class="mb-3">' +
+                                '<label for="member' + i + '" class="form-label">Thành viên ' + i + ' :</label>' +
+                                '<input type="text" class="form-control" id="member' + i + '" name="members[]" ' + '>' +
+                                '</div>'
+                            );
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error: ' + status + error);
+                    }
+                });
+            } else {
+                $('#sportFee').text('');
+                $('#members').empty();
+            }
+        });
+    });
+</script>
+</body>
+</html>

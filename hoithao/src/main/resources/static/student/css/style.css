@@ -1,0 +1,104 @@
+.box-tools .breadcrumb{
+	margin-bottom: 0;
+	padding: 5px;
+	background: none;
+}
+.box-tools .breadcrumb li{
+	margin-right: 15px;
+	float: left
+}
+.box-tools .breadcrumb li a{
+	color: #333
+}
+.content-header > .breadcrumb{
+	padding: 0 7px
+}
+.content .panel-body{
+	padding: 5px
+}
+.table-form .form-inline .input-group>.form-control{
+	width: 300px;
+}
+.panel-pagination .panel-body{
+	padding-top: 0;
+	padding-bottom: 0;
+}
+.post-category{
+	padding-left: 0
+}
+.post-category ul{
+	padding-left: 15px
+}
+.btn-social{
+	padding-left: 32px
+}
+.btn-social > :first-child {
+    width: 32px;
+    line-height: 32px;
+    font-size: 16px;
+}
+.table-action a.label{
+	margin-left: 5px
+}
+.match-info {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid #ccc;
+	padding: 5px 0;
+	margin-bottom: 5px;
+}
+
+.match-info > div {
+	flex: 1;
+	text-align: center;
+}
+.match-info-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background-color: #f2f2f2;
+	padding: 5px 10px;
+	font-weight: bold;
+}
+
+.header-item {
+	flex: 1;
+	text-align: center;
+}
+.ranking-container {
+	margin: 20px;
+	padding: 20px;
+	background: #f9f9f9;
+	border-radius: 10px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.ranking-header {
+	font-size: 1.5em;
+	margin-bottom: 20px;
+	color: #333;
+}
+
+.ranking-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.ranking-table thead {
+	background: #007bff;
+	color: #fff;
+}
+
+.ranking-table th, .ranking-table td {
+	padding: 10px;
+	border: 1px solid #ddd;
+}
+
+.ranking-table tbody tr:nth-child(odd) {
+	background: #f2f2f2;
+}
+
+.ranking-table tbody tr:nth-child(even) {
+	background: #fff;
+}

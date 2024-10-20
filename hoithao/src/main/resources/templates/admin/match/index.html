@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments/head::head"></head>
+<body class="hold-transition skin-blue sidebar-mini">
+<!-- Site wrapper -->
+<div class="wrapper">
+
+    <header th:replace="admin/fragments/header::header"></header>
+
+    <!-- =============================================== -->
+    <div th:replace="admin/fragments/sidebar::sidebar"></div>
+    <!-- Left side column. contains the sidebar -->
+
+
+    <!-- =============================================== -->
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                HỘI THAO KHOA CÔNG NGHỆ THÔNG TIN
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+                <li><a href="#">Examples</a></li>
+                <li class="active">Blank page</li>
+            </ol>
+        </section>
+        <!-- Listbox for sports -->
+        <section class="content-header">
+            <label for="sport-select">Chọn môn thi đấu:</label>
+            <select id="sport-select">
+                <option value="all">Tất cả</option>
+                <option th:each="sport : ${sports}" th:value="${sport.idSport}" th:text="${sport.sportName}">Môn thi đấu</option>
+            </select>
+        </section>
+        <!-- Main content -->
+        <section class="content">
+            <div class="box-header with-border">
+                <h3 class="box-title">Danh Sách Trận Đấu</h3>
+                <div> <a class="btn btn-success" th:href="@{/admin/add-match}"> Thêm Mới Trận Đấu </a></div>
+            </div>
+            <!-- Default box -->
+            <div class="container">
+                <!-- Vòng Bảng Section -->
+                <div class="column">
+                    <h2>Vòng Bảng</h2>
+                    <div class="match-info-header">
+<!--                        <div class="header-item">Môn thi đấu</div>-->
+                        <div class="header-item">Trận</div>
+                        <div class="header-item">Ngày thi đấu</div>
+                        <div class="header-item">Giờ thi đấu</div>
+                        <div class="header-item">Địa điểm</div>
+                        <div class="header-item">Đội</div>
+                        <div class="header-item">Tỉ số</div>
+                        <div class="header-item">Tác vụ</div>
+                    </div>
+                    <div th:each="match : ${matches}">
+                        <div th:if="${match.round != null and match.round.idRound != null and match.round.idRound == 1}" class="match" th:attr="data-sport=${match.team1.sport.idSport}">
+                            <div class="match-info">
+<!--                                <div class="sportName" th:text="${match.team1.sport.sportName}">Tên Môn thi đấu</div>-->
+                                <div class="name" th:text="${match.team1.sport.sportName + ' - ' + match.matchName}" >Tên Trận Đấu</div>
+                                <div class="time" th:text="${#temporals.format(match.time, 'dd/MM/yyyy')}">Ngày</div>
+                                <div class="timeStart" th:text="${match.timeStart}">Giờ</div>
+                                <div class="arena" th:text="${match.arena.nameArena}">Sân đấu</div>
+                                <div class="teams" th:text="${match.team1.teamName + ' vs ' + match.team2.teamName}">Đội 1 vs Đội 2</div>
+                                <div class="score" th:text="${match.point1 == -1 && match.point2 == -1 ? '_ : _' : match.point1 + ' : ' + match.point2}">Tỉ số</div>
+                                <div class="edit-buttons">
+                                    <a th:if="${match.point1 == -1 && match.point2 == -1}"
+                                       th:href="@{/admin/updateMatchResult/{id}(id=${match.idMatch})}"
+                                       class="btn btn-primary">Cập Nhật</a>
+                                    <a th:if="${match.point1 != -1 || match.point2 != -1}"
+                                       th:href="@{/admin/resetMatchResult/{id}(id=${match.idMatch})}"
+                                       class="btn btn-warning">Reset</a>
+                                    <a th:href="@{/admin/delete-match/{id}(id=${match.idMatch})}" class="btn btn-danger">Xóa</a>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <!-- Vòng Loại Trực Tiếp Section -->
+                <div class="column">
+                    <h2>Vòng Loại Trực Tiếp</h2>
+                    <!-- Vòng 1/8 -->
+                    <h3>Vòng 1/8</h3>
+                    <div class="match-info-header">
+                        <!--   <div class="header-item">Môn thi đấu</div>-->
+                        <div class="header-item">Trận</div>
+                        <div class="header-item">Ngày thi đấu</div>
+                        <div class="header-item">Giờ thi đấu</div>
+                        <div class="header-item">Địa điểm</div>
+                        <div class="header-item">Đội</div>
+                        <div class="header-item">Tỉ số</div>
+                        <div class="header-item">Tác vụ</div>
+                    </div>
+                    <div th:each="match : ${matches}">
+                        <div th:if="${match.round != null and match.round.idRound != null and match.round.idRound == 2}" class="match" th:attr="data-sport=${match.team1.sport.idSport}">
+                            <div class="match-info">
+                                <!--<div class="sportName" th:text="${match.team1.sport.sportName}">Tên Môn thi đấu</div>-->
+                                <div class="name" th:text="${match.team1.sport.sportName + ' - ' + match.matchName}" >Tên Trận Đấu</div>
+                                <div class="time" th:text="${#temporals.format(match.time, 'dd/MM/yyyy')}">Ngày</div>
+                                <div class="timeStart" th:text="${match.timeStart}">Giờ</div>
+                                <div class="arena" th:text="${match.arena.nameArena}">Sân đấu</div>
+                                <div class="teams" th:text="${match.team1.teamName + ' vs ' + match.team2.teamName}">Đội 1 vs Đội 2</div>
+                                <div class="score" th:text="${match.point1 == -1 && match.point2 == -1 ? '_ : _' : match.point1 + ' : ' + match.point2}">Tỉ số</div>
+                                <div class="edit-buttons">
+                                    <a th:if="${match.point1 == -1 && match.point2 == -1}"
+                                       th:href="@{/admin/updateMatchResult/{id}(id=${match.idMatch})}"
+                                       class="btn btn-primary">Cập Nhật</a>
+                                    <a th:if="${match.point1 != -1 || match.point2 != -1}"
+                                       th:href="@{/admin/resetMatchResult/{id}(id=${match.idMatch})}"
+                                       class="btn btn-warning">Reset</a>
+                                    <a th:href="@{/admin/delete-match/{id}(id=${match.idMatch})}" class="btn btn-danger">Xóa</a>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Vòng Tứ Kết -->
+                    <h3>Vòng Tứ Kết</h3>
+                    <div class="match-info-header">
+                        <!--   <div class="header-item">Môn thi đấu</div>-->
+                        <div class="header-item">Trận</div>
+                        <div class="header-item">Ngày thi đấu</div>
+                        <div class="header-item">Giờ thi đấu</div>
+                        <div class="header-item">Địa điểm</div>
+                        <div class="header-item">Đội</div>
+                        <div class="header-item">Tỉ số</div>
+                        <div class="header-item">Tác vụ</div>
+                    </div>
+                    <div th:each="match : ${matches}">
+                        <div th:if="${match.round != null and match.round.idRound != null and match.round.idRound == 3}" class="match" th:attr="data-sport=${match.team1.sport.idSport}">
+                            <div class="match-info">
+                                <!--<div class="sportName" th:text="${match.team1.sport.sportName}">Tên Môn thi đấu</div>-->
+                                <div class="name" th:text="${match.team1.sport.sportName + ' - ' + match.matchName}" >Tên Trận Đấu</div>
+                                <div class="time" th:text="${#temporals.format(match.time, 'dd/MM/yyyy')}">Ngày</div>
+                                <div class="timeStart" th:text="${match.timeStart}">Giờ</div>
+                                <div class="arena" th:text="${match.arena.nameArena}">Sân đấu</div>
+                                <div class="teams" th:text="${match.team1.teamName + ' vs ' + match.team2.teamName}">Đội 1 vs Đội 2</div>
+                                <div class="score" th:text="${match.point1 == -1 && match.point2 == -1 ? '_ : _' : match.point1 + ' : ' + match.point2}">Tỉ số</div>
+                                <div class="edit-buttons">
+                                    <a th:if="${match.point1 == -1 && match.point2 == -1}"
+                                       th:href="@{/admin/updateMatchResult/{id}(id=${match.idMatch})}"
+                                       class="btn btn-primary">Cập Nhật</a>
+                                    <a th:if="${match.point1 != -1 || match.point2 != -1}"
+                                       th:href="@{/admin/resetMatchResult/{id}(id=${match.idMatch})}"
+                                       class="btn btn-warning">Reset</a>
+                                    <a th:href="@{/admin/delete-match/{id}(id=${match.idMatch})}" class="btn btn-danger">Xóa</a>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Vòng Bán Kết -->
+                    <h3>Vòng Bán Kết</h3>
+                    <div class="match-info-header">
+                        <!--   <div class="header-item">Môn thi đấu</div>-->
+                        <div class="header-item">Trận</div>
+                        <div class="header-item">Ngày thi đấu</div>
+                        <div class="header-item">Giờ thi đấu</div>
+                        <div class="header-item">Địa điểm</div>
+                        <div class="header-item">Đội</div>
+                        <div class="header-item">Tỉ số</div>
+                        <div class="header-item">Tác vụ</div>
+                    </div>
+                    <div th:each="match : ${matches}">
+                        <div th:if="${match.round != null and match.round.idRound != null and match.round.idRound == 4}" class="match" th:attr="data-sport=${match.team1.sport.idSport}">
+                            <div class="match-info">
+                                <!--<div class="sportName" th:text="${match.team1.sport.sportName}">Tên Môn thi đấu</div>-->
+                                <div class="name" th:text="${match.team1.sport.sportName + ' - ' + match.matchName}" >Tên Trận Đấu</div>
+                                <div class="time" th:text="${#temporals.format(match.time, 'dd/MM/yyyy')}">Ngày</div>
+                                <div class="timeStart" th:text="${match.timeStart}">Giờ</div>
+                                <div class="arena" th:text="${match.arena.nameArena}">Sân đấu</div>
+                                <div class="teams" th:text="${match.team1.teamName + ' vs ' + match.team2.teamName}">Đội 1 vs Đội 2</div>
+                                <div class="score" th:text="${match.point1 == -1 && match.point2 == -1 ? '_ : _' : match.point1 + ' : ' + match.point2}">Tỉ số</div>
+                                <div class="edit-buttons">
+                                    <a th:if="${match.point1 == -1 && match.point2 == -1}"
+                                       th:href="@{/admin/updateMatchResult/{id}(id=${match.idMatch})}"
+                                       class="btn btn-primary">Cập Nhật</a>
+                                    <a th:if="${match.point1 != -1 || match.point2 != -1}"
+                                       th:href="@{/admin/resetMatchResult/{id}(id=${match.idMatch})}"
+                                       class="btn btn-warning">Reset</a>
+                                    <a th:href="@{/admin/delete-match/{id}(id=${match.idMatch})}" class="btn btn-danger">Xóa</a>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Tranh Hạng 3 -->
+                    <h3>Tranh Hạng 3</h3>
+                    <div class="match-info-header">
+                        <!--   <div class="header-item">Môn thi đấu</div>-->
+                        <div class="header-item">Trận</div>
+                        <div class="header-item">Ngày thi đấu</div>
+                        <div class="header-item">Giờ thi đấu</div>
+                        <div class="header-item">Địa điểm</div>
+                        <div class="header-item">Đội</div>
+                        <div class="header-item">Tỉ số</div>
+                        <div class="header-item">Tác vụ</div>
+                    </div>
+                    <div th:each="match : ${matches}">
+                        <div th:if="${match.round != null and match.round.idRound != null and match.round.idRound == 5}" class="match" th:attr="data-sport=${match.team1.sport.idSport}">
+                            <div class="match-info">
+                                <!--<div class="sportName" th:text="${match.team1.sport.sportName}">Tên Môn thi đấu</div>-->
+                                <div class="name" th:text="${match.team1.sport.sportName + ' - ' + match.matchName}" >Tên Trận Đấu</div>
+                                <div class="time" th:text="${#temporals.format(match.time, 'dd/MM/yyyy')}">Ngày</div>
+                                <div class="timeStart" th:text="${match.timeStart}">Giờ</div>
+                                <div class="arena" th:text="${match.arena.nameArena}">Sân đấu</div>
+                                <div class="teams" th:text="${match.team1.teamName + ' vs ' + match.team2.teamName}">Đội 1 vs Đội 2</div>
+                                <div class="score" th:text="${match.point1 == -1 && match.point2 == -1 ? '_ : _' : match.point1 + ' : ' + match.point2}">Tỉ số</div>
+                                <div class="edit-buttons">
+                                    <a th:if="${match.point1 == -1 && match.point2 == -1}"
+                                       th:href="@{/admin/updateMatchResult/{id}(id=${match.idMatch})}"
+                                       class="btn btn-primary">Cập Nhật</a>
+                                    <a th:if="${match.point1 != -1 || match.point2 != -1}"
+                                       th:href="@{/admin/resetMatchResult/{id}(id=${match.idMatch})}"
+                                       class="btn btn-warning">Reset</a>
+                                    <a th:href="@{/admin/delete-match/{id}(id=${match.idMatch})}" class="btn btn-danger">Xóa</a>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Chung Kết -->
+                    <h3>Chung Kết</h3>
+                    <div class="match-info-header">
+                        <!--   <div class="header-item">Môn thi đấu</div>-->
+                        <div class="header-item">Trận</div>
+                        <div class="header-item">Ngày thi đấu</div>
+                        <div class="header-item">Giờ thi đấu</div>
+                        <div class="header-item">Địa điểm</div>
+                        <div class="header-item">Đội</div>
+                        <div class="header-item">Tỉ số</div>
+                        <div class="header-item">Tác vụ</div>
+                    </div>
+                    <div th:each="match : ${matches}">
+                        <div th:if="${match.round != null and match.round.idRound != null and match.round.idRound == 6}" class="match" th:attr="data-sport=${match.team1.sport.idSport}">
+                            <div class="match-info">
+                                <!--<div class="sportName" th:text="${match.team1.sport.sportName}">Tên Môn thi đấu</div>-->
+                                <div class="name" th:text="${match.team1.sport.sportName + ' - ' + match.matchName}" >Tên Trận Đấu</div>
+                                <div class="time" th:text="${#temporals.format(match.time, 'dd/MM/yyyy')}">Ngày</div>
+                                <div class="timeStart" th:text="${match.timeStart}">Giờ</div>
+                                <div class="arena" th:text="${match.arena.nameArena}">Sân đấu</div>
+                                <div class="teams" th:text="${match.team1.teamName + ' vs ' + match.team2.teamName}">Đội 1 vs Đội 2</div>
+                                <div class="score" th:text="${match.point1 == -1 && match.point2 == -1 ? '_ : _' : match.point1 + ' : ' + match.point2}">Tỉ số</div>
+                                <div class="edit-buttons">
+                                    <a th:if="${match.point1 == -1 && match.point2 == -1}"
+                                       th:href="@{/admin/updateMatchResult/{id}(id=${match.idMatch})}"
+                                       class="btn btn-primary">Cập Nhật</a>
+                                    <a th:if="${match.point1 != -1 || match.point2 != -1}"
+                                       th:href="@{/admin/resetMatchResult/{id}(id=${match.idMatch})}"
+                                       class="btn btn-warning">Reset</a>
+                                    <a th:href="@{/admin/delete-match/{id}(id=${match.idMatch})}" class="btn btn-danger">Xóa</a>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.box -->
+
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+    <footer th:replace="admin/fragments/footer::footer"></footer>
+</div>
+
+<!-- ./wrapper -->
+
+<!-- jQuery 3 -->
+
+<div th:replace="admin/fragments/script::script"></div>
+<script>
+    $(document).ready(function() {
+        $('#sport-select').change(function() {
+            var selectedSport = $(this).val();
+            if (selectedSport === "all") {
+                $('.match').show();
+            } else {
+                $('.match').hide();
+                $('.match[data-sport="' + selectedSport + '"]').show();
+            }
+        });
+    });
+</script>
+</body>
+</html>

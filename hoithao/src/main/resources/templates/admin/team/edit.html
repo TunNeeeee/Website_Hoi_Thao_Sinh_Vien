@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments/head::head"></head>
+<body class="hold-transition skin-blue sidebar-mini">
+<!-- Site wrapper -->
+<div class="wrapper">
+
+    <header th:replace="admin/fragments/header::header"></header>
+
+    <!-- =============================================== -->
+    <header th:replace="admin/fragments/sidebar::sidebar"></header>
+    <!-- Left side column. contains the sidebar -->
+
+
+    <!-- =============================================== -->
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Thông tin đội
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+                <li><a href="#">Examples</a></li>
+                <li class="active">Blank page</li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <!-- Default box -->
+            <div class="col-md-9">
+                <div class="box box-primary">
+                    <form role="form" method="post" th:action="@{/admin/edit-team/{id}(id=${team.idTeam})}" th:object="${team}">
+                        <input type="hidden" class="form-control" th:field="*{idTeam}">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label for="teamName">Tên Đội</label>
+                                <input type="text" class="form-control" id="teamName" th:field="*{teamName}">
+                            </div>
+                            <div class="form-group">
+                                <label for="number">Số Đội</label>
+                                <input type="text" class="form-control" id="number" th:field="*{number}">
+                            </div>
+                            <div class="form-group">
+                                <label for="captainName">Tên Đội Trưởng</label>
+                                <input type="text" class="form-control" id="captainName" th:field="*{captainName}">
+                            </div>
+                            <div class="form-group">
+                                <label for="status">Trạng Thái</label>
+                                <input type="number" class="form-control" id="status" th:field="*{status}">
+                            </div>
+                            <div class="form-group">
+                                <label for="numberGame">Số Trận Đã Chơi</label>
+                                <input type="number" class="form-control" id="numberGame" th:field="*{numberGame}">
+                            </div>
+                            <div class="form-group">
+                                <label for="point">Điểm</label>
+                                <input type="number" class="form-control" id="point" th:field="*{point}">
+                            </div>
+                            <div class="form-group">
+                                <label for="hs">Hiệu Số</label>
+                                <input type="number" class="form-control" id="hs" th:field="*{hs}">
+                            </div>
+                            <div class="form-group">
+                                <label for="noRank">Thứ Hạng</label>
+                                <input type="number" class="form-control" id="noRank" th:field="*{noRank}">
+                            </div>
+                            <div class="form-group">
+                                <label for="user">Người Dùng</label>
+                                <input type="text" class="form-control" id="user" th:field="*{user}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="sport" class="form-label">Môn Thể Thao</label>
+                                <select th:field="*{sport}" class="form-control" id="sport">
+                                    <option th:each="sport : ${sports}"
+                                            th:value="${sport.idSport}" th:text="${sport.sportName}" th:selected="${sport.idSport == team.sport.idSport}"></option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="rank">Xếp Hạng</label>
+                                <input type="text" class="form-control" id="rank" th:field="*{rank}">
+                            </div>
+                        </div>
+
+                        <div class="box-footer">
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+    <footer th:replace="admin/fragments/footer::footer"></footer>
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery 3 -->
+<div th:replace="admin/fragments/script::script"></div>
+</body>
+</html>

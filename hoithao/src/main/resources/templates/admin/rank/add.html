@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments/head::head">
+    <title>Create Rank</title>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<!-- Site wrapper -->
+<div class="wrapper">
+    <header th:replace="admin/fragments/header::header"></header>
+    <div th:replace="admin/fragments/sidebar::sidebar"></div>
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>Create Rank</h1>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <form role="form" method="post" th:action="@{/admin/add-rank}" th:object="${rank}">
+                <div class="form-group">
+                    <label for="nameRank">Rank Name</label>
+                    <input type="text" id="nameRank" name="nameRank" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Rank</button>
+            </form>
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+    <footer th:replace="admin/fragments/footer::footer"></footer>
+</div>
+<!-- ./wrapper -->
+<div th:replace="admin/fragments/script::script"></div>
+
+
+</body>
+</html>

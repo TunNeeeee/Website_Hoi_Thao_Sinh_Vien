@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments/head :: head"></head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+    <header th:replace="admin/fragments/header :: header"></header>
+    <header th:replace="admin/fragments/sidebar :: sidebar"></header>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1>CẬP NHẬT BẢNG ĐẤU</h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+                <li><a href="#">Examples</a></li>
+                <li class="active">Blank page</li>
+            </ol>
+        </section>
+
+        <section class="content">
+            <div class="col-md-9">
+                <div class="box box-primary">
+                    <form th:action="@{/admin/team-add-rank}" method="post">
+                        <input type="hidden" name="idTeam" th:value="${team.idTeam}" />
+                        <label for="idRank">Select Rank:</label>
+                        <select name="idRank" id="idRank">
+                            <option th:each="rank : ${ranks}" th:value="${rank.idRank}" th:text="${rank.nameRank}"></option>
+                        </select>
+                        <button type="submit">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer th:replace="admin/fragments/footer :: footer"></footer>
+</div>
+
+<div th:replace="admin/fragments/script :: script"></div>
+</body>
+</html>

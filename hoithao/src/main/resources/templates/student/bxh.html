@@ -1,0 +1,171 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="student/fragments/head::head"></head>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Team Registration Form">
+    <meta name="author" content="">
+    <title>HỘI THAO HUTECH</title>
+
+    <!-- CSS FILES -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700;900&display=swap" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/slick.css"/>
+    <link href="css/tooplate-little-fashion.css" rel="stylesheet">
+
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .navbar-brand img {
+            vertical-align: middle;
+            width: 150px;
+            height: auto;
+        }
+
+        .custom-icon {
+            /* Define your custom icon styles here */
+        }
+    </style>
+</head>
+<body>
+<header class="main-header">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/student/}">
+            <img src="https://file1.hutech.edu.vn/file/editor/homepage/stories/hinh34/logo%20CMYK-03.png" alt="Logo" style="width: 150px; height: auto;">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/student/}">Trang chủ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/student/registration}">Đăng Ký Hội Thao</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/student/sports}">Bảng Đấu</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/student/showListMatch}">Lịch Thi Đấu</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/student/showListMatch}">Bảng Xếp Hạng</a>
+                </li>
+            </ul>
+            <div class="d-none d-lg-block">
+                <a href="/logout" class="bi-person custom-icon me-3"></a>
+            </div>
+        </div>
+    </div>
+</header>
+<section class="content">
+    <!-- Default box -->
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="text-center">BẢNG XẾP HẠNG</h3>
+            </div>
+            <div class="box-tools">
+                <form method="get" th:action="@{/student/list-team}">
+                    <div class="input-group input-group-sm hidden-xs" style="width: 150px;">
+                        <select name="sportId" class="form-control">
+                            <option value="" th:text="'All Sports'" th:selected="${selectedSportId == null}"></option>
+                            <option th:each="sport : ${sports}"
+                                    th:value="${sport.idSport}"
+                                    th:text="${sport.sportName}"
+                                    th:selected="${selectedSportId == sport.idSport}"></option>
+                        </select>
+                        <div class="input-group-btn">
+                            <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="box-body">
+                <table class="table table-bordered">
+                    <tbody>
+                    <tr>
+                        <th>Xếp Hạng</th>
+                        <th>Tên đội</th>
+                        <th>Đội trưởng</th>
+                        <th>Thành Tích</th>
+                    </tr>
+
+                    <tr th:each="team : ${teams}">
+                        <td th:text="${team.noFinal}"></td>
+                        <td th:text="${team.sport.sportName + ' - ' + team.teamName}"></td>
+                        <td th:text="${team.captainName}"></td>
+                        <td>
+                            <span th:if="${team.status == 10}" th:text="'Đội Vô Địch'"></span>
+                            <span th:if="${team.status == 0 && team.noFinal == 2}" th:text="'Á Quân'"></span>
+                            <span th:else th:if="${team.status == 0 && team.noFinal == 3}" th:text="'Hạng 3'"></span>
+                            <span th:else th:if="${team.status == 0 && team.noFinal > 4}" th:text="'NoRank'"></span>
+                        </td>
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+<!-- JavaScript Files -->
+<footer class="site-footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-10 me-auto mb-4">
+                <h4 class="text-white mb-3"><a href="index.html">HU</a> TECH</h4>
+                <p class="copyright-text text-muted mt-lg-5 mb-4 mb-lg-0">Copyright © 2024 <strong>HUTECH</strong></p>
+                <br>
+                <p class="copyright-text">Designed by <a href="https://www.tooplate.com/" target="_blank">TÀI TUẤN QUỲNH</a></p>
+            </div>
+            <div class="col-lg-5 col-8">
+                <h5 class="text-white mb-3">Sitemap</h5>
+                <ul class="footer-menu d-flex flex-wrap">
+                    <li class="footer-menu-item"><a href="about.html" class="footer-menu-link">Story</a></li>
+                    <li class="footer-menu-item"><a href="products.html" class="footer-menu-link">Sports</a></li>
+                    <li class="footer-menu-item"><a href="#" class="footer-menu-link">Privacy policy</a></li>
+                    <li class="footer-menu-item"><a href="faq.html" class="footer-menu-link">FAQs</a></li>
+                    <li class="footer-menu-item"><a href="contact.html" class="footer-menu-link">Contact</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3 col-4">
+                <h5 class="text-white mb-3">Social</h5>
+                <ul class="social-icon">
+                    <li><a href="#" class="social-icon-link bi-youtube"></a></li>
+                    <li><a href="#" class="social-icon-link bi-whatsapp"></a></li>
+                    <li><a href="#" class="social-icon-link bi-instagram"></a></li>
+                    <li><a href="#" class="social-icon-link bi-skype"></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+<footer th:replace="admin/fragments/footer::footer"></footer>
+<script th:src="@{/student/js/jquery.min.js}"></script>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/Headroom.js}"></script>
+<script th:src="@{/js/jQuery.headroom.js}"></script>
+<script th:src="@{/js/slick.min.js}"></script>
+<script th:src="@{/js/custom.js}"></script>
+</html>

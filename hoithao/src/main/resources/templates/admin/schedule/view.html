@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments/head::head"></head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+    <header th:replace="admin/fragments/header::header"></header>
+    <div th:replace="admin/fragments/sidebar::sidebar"></div>
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1 style="text-align: center;" th:text="${schedule.sport.sportName}">Tên môn thi đấu</h1>
+
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+                <li><a href="#">Examples</a></li>
+                <li class="active">Blank page</li>
+            </ol>
+        </section>
+        <section class="content">
+            <div class="container">
+                <div class="column">
+                    <h2>Vòng Bảng</h2>
+                    <div class="text-center mb-3">
+                        <form action="/admin/add-match" method="get">
+                            <input type="hidden" name="scheduleId" th:value="${schedule.id}">
+                            <button type="submit" class="btn btn-primary">Thêm trận đấu</button>
+                        </form>
+                    </div>
+                    <div th:each="match : ${groupStageMatchesAtoD}">
+                        <div class="match">
+                            <div class="date" th:text="${match.date}">Ngày</div>
+                            <div class="time" th:text="${match.time}">Giờ</div>
+                            <div class="teams" th:text="${match.team1} + ' vs ' + ${match.team2}">Đội 1 vs Đội 2</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <h2>Vòng Loại Trực Tiếp</h2>
+                    <h3>Vòng 1/8</h3>
+                    <div class="text-center mb-3">
+                        <form action="/admin/add-match" method="get">
+                            <input type="hidden" name="scheduleId" th:value="${schedule.id}">
+                            <button type="submit" class="btn btn-primary">Thêm trận đấu</button>
+                        </form>
+                    </div>
+                    <div th:each="match : ${roundOf16Matches}">
+                        <div class="match">
+                            <div class="date" th:text="${match.date}">Ngày</div>
+                            <div class="time" th:text="${match.time}">Giờ</div>
+                            <div class="teams" th:text="${match.team1} + ' vs ' + ${match.team2}">Đội 1 vs Đội 2</div>
+                        </div>
+                    </div>
+
+                    <h3>Vòng Tứ Kết</h3>
+                    <div class="text-center mb-3">
+                        <form action="/admin/add-match" method="get">
+                            <input type="hidden" name="scheduleId" th:value="${schedule.id}">
+                            <button type="submit" class="btn btn-primary">Thêm trận đấu</button>
+                        </form>
+                    </div>
+                    <div th:each="match : ${quarterFinalMatches}">
+                        <div class="match">
+                            <div class="date" th:text="${match.date}">Ngày</div>
+                            <div class="time" th:text="${match.time}">Giờ</div>
+                            <div class="teams" th:text="${match.team1} + ' vs ' + ${match.team2}">Đội 1 vs Đội 2</div>
+                        </div>
+                    </div>
+
+                    <h3>Vòng Bán Kết</h3>
+                    <div class="text-center mb-3">
+                        <form action="/admin/add-match" method="get">
+                            <input type="hidden" name="scheduleId" th:value="${schedule.id}">
+                            <button type="submit" class="btn btn-primary">Thêm trận đấu</button>
+                        </form>
+                    </div>
+                    <div th:each="match : ${semiFinalMatches}">
+                        <div class="match">
+                            <div class="date" th:text="${match.date}">Ngày</div>
+                            <div class="time" th:text="${match.time}">Giờ</div>
+                            <div class="teams" th:text="${match.team1} + ' vs ' + ${match.team2}">Đội 1 vs Đội 2</div>
+                        </div>
+                    </div>
+
+                    <h3>Tranh Hạng 3</h3>
+                    <div class="text-center mb-3">
+                        <form action="/admin/add-match" method="get">
+                            <input type="hidden" name="scheduleId" th:value="${schedule.id}">
+                            <button type="submit" class="btn btn-primary">Thêm trận đấu</button>
+                        </form>
+                    </div>
+                    <div th:each="match : ${thirdPlaceMatch}">
+                        <div class="match">
+                            <div class="date" th:text="${match.date}">Ngày</div>
+                            <div class="time" th:text="${match.time}">Giờ</div>
+                            <div class="teams" th:text="${match.team1} + ' vs ' + ${match.team2}">Đội 1 vs Đội 2</div>
+                        </div>
+                    </div>
+
+                    <h3>Chung Kết</h3>
+                    <div class="text-center mb-3">
+                        <form action="/admin/add-match" method="get">
+                            <input type="hidden" name="scheduleId" th:value="${schedule.id}">
+                            <button type="submit" class="btn btn-primary">Thêm trận đấu</button>
+                        </form>
+                    </div>
+                    <div th:each="match : ${finalMatch}">
+                        <div class="match">
+                            <div class="date" th:text="${match.date}">Ngày</div>
+                            <div class="time" th:text="${match.time}">Giờ</div>
+                            <div class="teams" th:text="${match.team1} + ' vs ' + ${match.team2}">Đội 1 vs Đội 2</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <h2>Vòng Bảng</h2>
+                    <div class="text-center mb-3">
+                        <form action="/admin/add-match" method="get">
+                            <input type="hidden" name="scheduleId" th:value="${schedule.id}">
+                            <button type="submit" class="btn btn-primary">Thêm trận đấu</button>
+                        </form>
+                    </div>
+                    <div th:each="match : ${groupStageMatchesEtoH}">
+                        <div class="match">
+                            <div class="date" th:text="${match.date}">Ngày</div>
+                            <div class="time" th:text="${match.time}">Giờ</div>
+                            <div class="teams" th:text="${match.team1} + ' vs ' + ${match.team2}">Đội 1 vs Đội 2</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Nút Add Match -->
+
+        </section>
+    </div>
+    <footer th:replace="admin/fragments/footer::footer"></footer>
+</div>
+<div th:replace="admin/fragments/script::script"></div>
+</body>
+</html>

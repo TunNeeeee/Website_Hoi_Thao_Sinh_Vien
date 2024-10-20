@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments/head::head">
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+    <header th:replace="admin/fragments/header::header"></header>
+
+    <div th:replace="admin/fragments/sidebar::sidebar"></div>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1>
+                HÔI THAO KHOA CÔNG NGHỆ THÔNG TIN
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+                <li><a href="#">Examples</a></li>
+                <li class="active">Danh sách lịch thi đấu</li>
+            </ol>
+        </section>
+
+        <section class="content">
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Danh sách lịch thi đấu</h3>
+                        <div><a class="btn btn-success" href="/admin/schedule-add">Thêm mới lịch thi đấu</a></div>
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên lịch thi đấu</th>
+                                <th>Môn thể thao</th>
+                                <th>Mô tả</th>
+
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="schedule : ${schedules}">
+                                <td th:text="${schedule.id}"></td>
+                                <td th:text="${schedule.scheduleName}"></td>
+                                <td th:text="${schedule.sport.sportName}"></td>
+                                <td th:text="${schedule.description}"></td>
+                                <!-- Add more columns as needed -->
+                                <td >
+                                    <a th:href="@{/admin/edit-schedule/{id}(id=${schedule.id})}" class="btn btn-success">Edit</a>
+                                    <a th:href="@{/admin/delete-schedule/{id}(id=${schedule.id})}" onclick="return confirm('Are you sure?')" class="btn btn-danger">Delete</a>
+                                    <a th:href="@{/admin/view-schedule/{id}(id=${schedule.id})}" class="btn btn-primary">Xem lịch thi đấu</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <ul class="pagination pagination-sm no-margin pull-right">
+                            <!-- Pagination -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer th:replace="admin/fragments/footer::footer"></footer>
+</div>
+
+<!-- ./wrapper -->
+
+<!-- jQuery 3 -->
+<div th:replace="admin/fragments/script::script"></div>
+</body>
+</html>

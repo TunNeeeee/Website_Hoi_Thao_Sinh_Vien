@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments/head::head">
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+    <header th:replace="admin/fragments/header::header"></header>
+
+    <div th:replace="admin/fragments/sidebar::sidebar"></div>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1>
+                Thêm mới lịch thi đấu
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+                <li><a href="#">Examples</a></li>
+                <li class="active">Thêm mới lịch thi đấu</li>
+            </ol>
+        </section>
+
+        <section class="content">
+            <div class="col-md-9">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Thông tin lịch thi đấu</h3>
+                    </div>
+                    <form role="form" method="post" th:action="@{/admin/schedule-add}" th:object="${schedule}">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label for="scheduleName">Tên lịch thi đấu</label>
+                                <input type="text" class="form-control" id="scheduleName" th:field="*{scheduleName}">
+                            </div>
+                            <div class="form-group">
+                                <label for="sport">Môn thể thao</label>
+                                <select class="form-control" id="sport" th:field="*{sport.id}">
+                                    <option value="">Chọn môn thể thao</option>
+                                    <option th:each="sport : ${sports}" th:value="${sport.id}" th:text="${sport.sportName}"></option>
+                                </select>
+                            </div>
+
+
+                            <div class="form-group">
+                                <label for="description">Mô tả</label>
+                                <textarea class="form-control" id="description" th:field="*{description}"></textarea>
+                            </div>
+                            <!-- Add fields for matches if needed -->
+
+                        </div>
+                        <div class="box-footer">
+                            <button type="submit" class="btn btn-primary">Thêm mới</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer th:replace="admin/fragments/footer::footer"></footer>
+</div>
+
+<!-- ./wrapper -->
+
+<!-- jQuery 3 -->
+<div th:replace="admin/fragments/script::script"></div>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HUTECH | HOI THAO SINH VIEN</title>
+    <link rel="shortcut icon" th:href="@{/img/favicon.ico}" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700;900&display=swap" rel="stylesheet">
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/bootstrap-icons.css}" rel="stylesheet">
+    <link th:href="@{/css/slick.css}" rel="stylesheet"/>
+    <link th:href="@{/css/tooplate-little-fashion.css}" rel="stylesheet">
+</head>
+<body>
+
+<main>
+    <section class="sign-in-form section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto col-12">
+                    <h1 class="hero-title text-center mb-5">Đăng nhập</h1>
+                    <div class="row">
+                        <div class="col-lg-8 col-11 mx-auto">
+                            <form th:action="@{/login}" method="post">
+                                <div th:if="${error}" class="alert alert-danger" role="alert">
+                                    <p th:text="${error}"></p>
+                                </div>
+                                <div class="form-floating mb-4 p-0">
+                                    <input type="text" name="username" id="username" class="form-control" placeholder="Student ID" required>
+                                    <label for="username">Tài khoản</label>
+                                </div>
+                                <div class="form-floating p-0">
+                                    <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
+                                    <label for="password">Mật khẩu</label>
+                                </div>
+                                <div th:if="${error}">
+                                    <p class="text-danger" th:text="${error}"></p>
+                                </div>
+                                <button type="submit" class="btn custom-btn form-control mt-4 mb-3">Đăng nhập</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+
+<script th:src="@{/js/jquery.min.js}"></script>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/Headroom.js}"></script>
+<script th:src="@{/js/jQuery.headroom.js}"></script>
+<script th:src="@{/js/slick.min.js}"></script>
+<script th:src="@{/js/custom.js}"></script>
+
+</body>
+</html>
