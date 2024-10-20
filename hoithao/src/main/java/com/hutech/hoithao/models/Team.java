@@ -60,15 +60,15 @@ public class Team {
     private Sport sport;
     @OneToMany(mappedBy = "team")
     private Set<Member> listMember;
-//    @OneToMany(mappedBy = "team1")
-//    private Set<Match> homeMatches;
-//
-//    @OneToMany(mappedBy = "team2")
-//    private Set<Match> awayMatches;
-//    @OneToMany(mappedBy = "team")
-//    private Set<RuleDetail> listRuleDetail;
-//    @ManyToOne
-//    @JoinColumn(name = "id_rank")
-//    private Rank rank;
+    @OneToMany(mappedBy = "team1")
+    private Set<Match> homeMatches;
+
+    @OneToMany(mappedBy = "team2")
+    private Set<Match> awayMatches;
+    @OneToMany(mappedBy = "team")
+    private Set<RuleDetail> listRuleDetail;
+    @ManyToOne
+    @JoinColumn(name = "id_group")
+    private Group group;
 
 }
