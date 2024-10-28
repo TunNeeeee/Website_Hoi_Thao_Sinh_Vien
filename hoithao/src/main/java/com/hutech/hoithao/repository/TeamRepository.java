@@ -9,6 +9,7 @@ import java.util.List;
 @Repository
 public interface TeamRepository extends JpaRepository<Team, Integer> {
     //Tim theo Id sport
+    List<Team> findAllByOrderByIdAsc();
     List<Team> findBySportId(Integer id);
     //Tim team theo bang dau
     List<Team> findTeamsByGroup_Id(Integer id);

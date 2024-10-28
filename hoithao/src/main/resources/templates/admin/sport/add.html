@@ -38,7 +38,7 @@
                             <div class="form-group">
                                 <label>Hội Thao</label>
                                 <select class="form-control" th:field="*{event}">
-                                    <option th:each="event : ${events}" th:value="${event.idEvent}" th:text="${event.eventName}"></option>
+                                    <option th:each="event : ${events}" th:value="${event.id}" th:text="${event.eventName}"></option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -47,7 +47,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Số Lượng Đội Tham Gia</label>
-                                <input type="number" class="form-control" th:field="*{numberTeam}">
+                                <input type="number" class="form-control" th:field="*{numberTeamMax}">
                             </div>
                             <div class="form-group">
                                 <label>Phí Ký Quỹ</label>

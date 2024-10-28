@@ -33,7 +33,9 @@ public class EventService {
         Event existingEvent = eventRepository.findById(event.getId())
                 .orElseThrow(() -> new IllegalStateException("Category with ID " +
                         event.getId() + " does not exist."));
-        existingEvent.setEventName(event.getEventName());
+        existingEvent.setStartDate(event.getStartDate());
+        existingEvent.setEndDate(event.getEndDate());
+        existingEvent.setStatus(event.getStatus());
         eventRepository.save(existingEvent);
     }
     //delete event

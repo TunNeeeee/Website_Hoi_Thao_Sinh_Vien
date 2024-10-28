@@ -11,4 +11,5 @@ import java.util.List;
 public interface SportRepository extends JpaRepository<Sport, Integer> {
     List<Sport> findByEventId(Integer id);
     List<Sport> findBySportNameContaining(String keyword);
+    List<Sport> findByStatus(int status);
 }
