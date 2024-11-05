@@ -6,7 +6,12 @@ import com.hutech.hoithao.models.Team;
 //import com.hutech.hoithao.service.RankService;
 //import com.hutech.hoithao.service.SportService;
 //import com.hutech.hoithao.service.TeamService;
+import com.hutech.hoithao.service.TeamService;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,21 +25,26 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/student")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class StudentController {
-//    @Autowired
-//    private GroupService groupService;
-//    @Autowired
-//    private TeamService teamService;
-//    @Autowired
-//    private SportService sportService;
+//    final GroupService groupService;
+//    final TeamService teamService;
+//    final SportService sportService;
+
+    @Value("${app.member}")
+    int member;
+
     @GetMapping
-    public String index(){
+    public String index() {
         return "redirect:/student/";
     }
+
     @GetMapping("/")
-    public  String student(){
+    public String student() {
         return "student/index";
     }
+
     @GetMapping("/logout")
     public String studentlogout() {
         return "login";

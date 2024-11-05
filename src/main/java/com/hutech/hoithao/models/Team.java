@@ -1,17 +1,15 @@
 package com.hutech.hoithao.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "Team")
-@Data
+@Setter
+@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -48,6 +46,7 @@ public class Team {
     // Xep hang chung cuoc - 1: Vo dich 2: A quan 3: Hang 3
     @Column
     private int noFinal;
+
     public Team(String name, byte[] paymentProof) {
         this.teamName = name;
         this.paymentProof = paymentProof;
