@@ -20,5 +20,5 @@ public interface TeamRepository extends JpaRepository<Team, Integer> {
     List<Team> findAllByOrderByNoRankAsc();
     List<Team> findBySportIdOrderByNoFinalAsc(Integer id);
 
-
+    long countBySportIdAndStatus(Integer sportId, int status);
 }

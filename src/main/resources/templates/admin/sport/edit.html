@@ -1,108 +1,121 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head  th:replace="admin/fragments/head::head"></head>
+<head th:replace="admin/fragments/head::head"></head>
 <body class="hold-transition skin-blue sidebar-mini">
-<!-- Site wrapper -->
 <div class="wrapper">
 
     <header th:replace="admin/fragments/header::header"></header>
+    <aside th:replace="admin/fragments/sidebar::sidebar"></aside>
 
-    <!-- =============================================== -->
-    <header th:replace="admin/fragments/sidebar::sidebar"></header>
-    <!-- Left side column. contains the sidebar -->
-
-
-    <!-- =============================================== -->
-
-    <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
-        <!-- Content Header (Page header) -->
         <section class="content-header">
             <h1>
-                Blank page
-                <small>it all starts here</small>
+                Chỉnh sửa Môn Thể Thao
+                <small>Quản lý dễ dàng</small>
             </h1>
             <ol class="breadcrumb">
-                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-                <li><a href="#">Examples</a></li>
-                <li class="active">Blank page</li>
+                <li><a href="#"><i class="fa fa-dashboard"></i> Trang Chủ</a></li>
+                <li><a href="#">Quản lý</a></li>
+                <li class="active">Chỉnh sửa môn thể thao</li>
             </ol>
         </section>
 
-        <!-- Main content -->
         <section class="content">
-            <!-- Default box -->
             <div class="col-md-9">
-
                 <div class="box box-primary">
                     <div class="box-header with-border">
-                        <h3 class="box-title">Danh Sách Các môn thể thao </h3>
-                        <div> <a class="btn-btn-successs"> Thêm Mới Môn Thể Thao </a></div>
+                        <h3 class="box-title">Danh sách các môn thể thao</h3>
+                        <div>
+                            <a href="/admin/sport/add" class="btn btn-success">Thêm Mới Môn Thể Thao</a>
+                        </div>
                     </div>
 
-
-                    <form role="form" method="post" th:action="@{/admin/edit-sport}" th:object="${sport}">
+                    <!-- Form chỉnh sửa -->
+                    <form role="form" method="post"
+                          th:action="@{/admin/edit-sport/{id}(id=${sport.id})}"
+                          th:object="${sport}">
                         <input type="hidden" class="form-control" th:field="*{id}">
+
                         <div class="box-body">
+                            <!-- Hội thao -->
                             <div class="form-group">
                                 <label>Hội Thao</label>
-                                <select class="form-control" th:field="*{event}">
-                                    <option th:each="event : ${events}" th:value="${event.id}" th:text="${event.eventName}"></option>
+                                <select class="form-control" th:field="*{event.id}" required>
+                                    <option value="" disabled>-- Chọn Hội Thao --</option>
+                                    <option th:each="event : ${events}"
+                                            th:value="${event.id}"
+                                            th:text="${event.eventName}"
+                                            th:selected="*{event != null and event.id == event.id}"></option>
                                 </select>
                             </div>
+
+                            <!-- Tên môn thể thao -->
                             <div class="form-group">
-                                <label for="exampleInputEmail1">Tên Hội Thao </label>
-                                <input type="text" class="form-control" id="exampleInputEmail1"  th:field="*{sportName}">
-                            </div>
-                            <div class="form-group">
-                                <label >Số Lượng Đội Tham Gia  </label>
-                                <input type="number" class="form-control" th:field="*{numberTeamMax}">
-                            </div>
-                            <div class="form-group">
-                                <label >Số Lượng Thành Viên </label>
-                                <input type="number" class="form-control" th:field="*{numberMember}">
-                            </div>
-                            <div class="form-group">
-                                <label >Phí Ký Quỹ  </label>
-                                <input type="number" class="form-control" th:field="*{phiKyQuy}">
-                            </div>
-                            <div class="form-group">
-                                <label >Phí Tham Gia </label>
-                                <input type="number" class="form-control" th:field="*{phiThamGia}">
-                            </div>
-                            <div class="form-group">
-                                <label for="startDate">Ngày Bắt Đầu</label>
-                                <input type="date" class="form-control" id="startDate" th:field="*{startDate}">
-                            </div>
-                            <div class="form-group">
-                                <label for="endDate">Ngày Kết Thúc</label>
-                                <input type="date" class="form-control" id="endDate" th:field="*{endDate}">
+                                <label for="sportName">Tên Môn Thể Thao</label>
+                                <input type="text" class="form-control" id="sportName"
+                                       th:field="*{sportName}"
+                                       placeholder="Nhập tên môn thể thao" required>
                             </div>
 
-                            <div class="box-footer">
-                                <button type="submit" class="btn btn-primary">Update</button>
+                            <!-- Định dạng thi đấu -->
+                            <div class="form-group">
+                                <label>Định Dạng Thi Đấu</label>
+                                <select class="form-control" th:field="*{format.id}" required>
+                                    <option value="" disabled>-- Chọn Định Dạng --</option>
+                                    <option th:each="format : ${formats}"
+                                            th:value="${format.id}"
+                                            th:text="${format.formatName}"
+                                            th:selected="*{format != null and format.id == format.id}"></option>
+                                </select>
                             </div>
 
+                            <!-- Các thông tin khác -->
+                            <div class="form-group">
+                                <label>Số Lượng Đội Tối Đa</label>
+                                <input type="number" class="form-control" th:field="*{numberTeamMax}"
+                                       placeholder="Nhập số lượng đội tối đa" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Số Lượng Thành Viên Mỗi Đội</label>
+                                <input type="number" class="form-control" th:field="*{numberMember}"
+                                       placeholder="Nhập số lượng thành viên mỗi đội" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Phí Ký Quỹ</label>
+                                <input type="number" class="form-control" th:field="*{phiKyQuy}"
+                                       placeholder="Nhập phí ký quỹ" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Phí Tham Gia</label>
+                                <input type="number" class="form-control" th:field="*{phiThamGia}"
+                                       placeholder="Nhập phí tham gia" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Ngày Bắt Đầu</label>
+                                <input type="date" class="form-control" th:field="*{startDate}">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Ngày Kết Thúc</label>
+                                <input type="date" class="form-control" th:field="*{endDate}">
+                            </div>
+                        </div>
+
+                        <div class="box-footer">
+                            <button type="submit" class="btn btn-primary">Cập Nhật</button>
                         </div>
                     </form>
-
-
-
-
-
                 </div>
             </div>
         </section>
-        <!-- /.content -->
     </div>
-    <!-- /.content-wrapper -->
 
     <footer th:replace="admin/fragments/footer::footer"></footer>
 </div>
-<!-- ./wrapper -->
-
-<!-- jQuery 3 -->
-
 <div th:replace="admin/fragments/script::script"></div>
 </body>
 </html>

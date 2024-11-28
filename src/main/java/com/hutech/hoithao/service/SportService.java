@@ -2,13 +2,16 @@ package com.hutech.hoithao.service;
 
 import com.hutech.hoithao.models.Sport;
 import com.hutech.hoithao.repository.SportRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -35,7 +38,9 @@ public class SportService {
         Pageable pageable = PageRequest.of(pageNo - 1, 3);
         return sportRepository.findAll(pageable);
     }
-
+    public void saveSport(Sport sport) {
+        sportRepository.save(sport);
+    }
     //add event
     public Boolean create(Sport sport) {
         try {
@@ -78,6 +83,25 @@ public class SportService {
     // Lấy danh sách các môn thể thao có trạng thái = 1
     public List<Sport> getActiveSports() {
         return sportRepository.findByStatus(1); // Giả sử bạn đã có method này trong repository
+    }
+    @Transactional
+    public void updateSportStatus() {
+        // Lấy danh sách môn thể thao có trạng thái 1
+        List<Sport> sports = sportRepository.findByStatus(1);
+
+        // Kiểm tra từng môn thể thao
+        for (Sport sport : sports) {
+            if (sport.getStartDate().isBefore(LocalDate.now()) || sport.getStartDate().isEqual(LocalDate.now())) {
+                // Cập nhật trạng thái
+                sport.setStatus(0);
+                sportRepository.save(sport); // Lưu lại thay đổi
+            }
+        }
+    }
+    // Lên lịch kiểm tra trạng thái (nếu muốn tích hợp trực tiếp)
+    @Scheduled(cron = "0 0 0 * * ?") // Chạy hàng ngày lúc 00:00
+    public void scheduleUpdateSportStatus() {
+        updateSportStatus();
     }
 }
 

@@ -23,4 +23,7 @@ public class TeamService {
     public Team findTeamById(Integer id) {
         return teamRepository.findById(id).orElse(null);
     }
+    public long countApprovedTeamsBySport(Integer sportId) {
+        return teamRepository.countBySportIdAndStatus(sportId, 2); // 2 là trạng thái đã duyệt
+    }
 }

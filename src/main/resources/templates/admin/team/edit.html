@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:c="http://www.w3.org/1999/XSL/Transform">
 <head th:replace="admin/fragments/head::head"></head>
 <body class="hold-transition skin-blue sidebar-mini">
 <!-- Site wrapper -->
@@ -31,6 +31,16 @@
                     <h3 class="card-title">Thông Tin Đội</h3>
                 </div>
                 <div class="card-body">
+                    <div th:if="${param.error == 'maxApproved'}">
+                        <div class="alert alert-danger" id="errorMessage">
+                            Số lượng đội đã đạt giới hạn cho môn thể thao <span th:text="${param.sport}"></span> này.
+                        </div>
+                    </div>
+                    <a th:if="${team.sport.getNumberTeamMax() <= approvedTeamsCount}">
+                        Số lượng đội đã đạt giới hạn
+                    </a>
+
+
                     <p><strong>ID:</strong> <span th:text="${team.id}"></span></p>
                     <p><strong>Tên Đội:</strong> <span th:text="${team.teamName}"></span></p>
                     <p><strong>Môn Thể Thao:</strong> <span th:text="${team.sport.sportName}"></span></p>
@@ -51,6 +61,7 @@
 
                     <h3>Hình Ảnh Minh Chứng Chuyển Khoản</h3>
                     <img th:src="@{/admin/team/image/{id}(id=${team.id})}" alt="Payment Proof" class="img-fluid" style="max-width: 300px; height: auto; margin-bottom: 20px;"/>
+
                     <div class="d-flex justify-content-between">
                     <form th:action="@{/admin/team/approve/{id}(id=${team.id})}" method="post" style="display:inline;">
                         <button type="submit" class="btn btn-success">Duyệt</button>
@@ -73,5 +84,14 @@
 
 <!-- jQuery 3 -->
 <div th:replace="admin/fragments/script::script"></div>
+<script>
+    // Kiểm tra nếu có thông báo lỗi
+    if (document.getElementById("errorMessage")) {
+        setTimeout(function() {
+            // Ẩn thông báo sau 5 giây
+            document.getElementById("errorMessage").style.display = "none";
+        }, 5000);
+    }
+</script>
 </body>
 </html>

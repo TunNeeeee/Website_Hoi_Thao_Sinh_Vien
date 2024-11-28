@@ -6,6 +6,18 @@
 <div class="wrapper">
 
     <header th:replace="admin/fragments/header::header"></header>
+    <style>
+        .is-invalid {
+            border: 2px solid red;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.875em;
+            margin-top: 5px;
+        }
+    </style>
+
 
     <!-- =============================================== -->
     <header th:replace="admin/fragments/sidebar::sidebar"></header>
@@ -44,6 +56,12 @@
                             <div class="form-group">
                                 <label>Tên Môn Thể Thao</label>
                                 <input type="text" class="form-control" th:field="*{sportName}">
+                            </div>
+                            <div class="form-group">
+                                <label>The thuc</label>
+                                <select class="form-control" th:field="*{format}">
+                                    <option th:each="format : ${formats}" th:value="${format.id}" th:text="${format.formatName}"></option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Số Lượng Đội Tham Gia</label>
@@ -90,4 +108,57 @@
 
 <div th:replace="admin/fragments/script::script"></div>
 </body>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form");
+
+        form.addEventListener("submit", function (event) {
+            let isValid = true;
+
+            // Lấy tất cả các input có thẻ required
+            const requiredInputs = form.querySelectorAll("input[required], select[required]");
+
+            requiredInputs.forEach(input => {
+                const errorMessage = input.nextElementSibling;
+                if (!input.value.trim()) {
+                    input.classList.add("is-invalid"); // Thêm viền đỏ
+                    if (errorMessage) {
+                        errorMessage.textContent = "Trường này là bắt buộc.";
+                    }
+                    isValid = false;
+                } else {
+                    input.classList.remove("is-invalid"); // Xóa viền đỏ
+                    if (errorMessage) {
+                        errorMessage.textContent = ""; // Xóa thông báo lỗi
+                    }
+                }
+            });
+
+            // Kiểm tra ngày
+            const startDate = new Date(document.getElementById("startDate").value);
+            const endDate = new Date(document.getElementById("endDate").value);
+            const today = new Date();
+
+            if (startDate <= today) {
+                alert("Ngày bắt đầu phải là một ngày trong tương lai.");
+                isValid = false;
+            }
+
+            if (endDate <= today) {
+                alert("Ngày kết thúc phải là một ngày trong tương lai.");
+                isValid = false;
+            }
+
+            if (startDate >= endDate) {
+                alert("Ngày bắt đầu phải trước ngày kết thúc.");
+                isValid = false;
+            }
+
+            if (!isValid) {
+                event.preventDefault(); // Ngăn form được submit
+            }
+        });
+    });
+</script>
+
 </html>

@@ -50,7 +50,7 @@ public class StudentTeamController {
         // Trả về tên của view (tệp HTML) để hiển thị form đăng ký
         return "student/registration"; // Đây là tên của tệp HTML (ví dụ: register_team.html)
     }
-    // Phương thức đăng ký team thi đấu với ảnh minh chứng
+
     @PostMapping("/register")
     public ResponseEntity<String> registerTeam(
             @AuthenticationPrincipal UserDetails user,
@@ -62,17 +62,22 @@ public class StudentTeamController {
 
         // Tìm kiếm User và Sport từ database
         User currentUser = userRepository.findByUsername(user.getUsername());
-
         Sport sport = sportService.findById(sportId);
 
         if (currentUser == null || sport == null) {
             return ResponseEntity.badRequest().body("User hoặc Sport không hợp lệ");
         }
 
+        // Kiểm tra kích thước file ảnh
+        long maxFileSize = 5 * 1024 * 1024; // 5 MB
+        if (paymentProofFile.getSize() > maxFileSize) {
+            return ResponseEntity.badRequest().body("File ảnh minh chứng quá lớn. Vui lòng chọn ảnh nhỏ hơn " + (maxFileSize / (1024 * 1024)) + " MB.");
+        }
+
         // Chuyển đổi file ảnh sang mảng byte
         byte[] paymentProof = null;
         try {
-            paymentProof = paymentProofFile.getBytes();
+            paymentProof = paymentProofFile.getBytes();  // Chuyển đổi MultipartFile thành mảng byte
         } catch (IOException e) {
             return ResponseEntity.badRequest().body("Lỗi khi xử lý ảnh minh chứng");
         }
@@ -90,7 +95,7 @@ public class StudentTeamController {
         // Lưu Team vào database
         teamService.saveTeam(team);
 
-// Lưu danh sách thành viên (cả tên và mã số sinh viên)
+        // Lưu danh sách thành viên
         Set<Member> members = new HashSet<>();
         for (int i = 0; i < memberNames.size(); i++) {
             String memberName = memberNames.get(i);
@@ -104,11 +109,12 @@ public class StudentTeamController {
         }
 
         // Lưu tất cả thành viên cùng một lúc
-        memberService.saveAllMembers(members); // Giả sử bạn có phương thức này trong MemberService
+        memberService.saveAllMembers(members);  // Giả sử bạn có phương thức này trong MemberService
 
         // Gán danh sách thành viên cho team và cập nhật lại
         team.setListMember(members);
         teamService.saveTeam(team);  // Cập nhật lại team với danh sách thành viên
+
         return ResponseEntity.ok("Đăng ký thành công!");  // Trả về phản hồi thành công
     }
 }

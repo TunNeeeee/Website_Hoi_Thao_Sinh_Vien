@@ -1,16 +1,15 @@
 package com.hutech.hoithao.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "`match`")
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,7 +25,7 @@ public class Match {
     private LocalDate time;
     //Thoi gian thi dau
     @Column(name = "timestart")
-    private String timeStart;
+    private LocalTime timeStart;
     @ManyToOne
     private Team team1;
     @Column(name = "point1")

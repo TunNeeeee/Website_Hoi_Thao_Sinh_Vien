@@ -56,19 +56,29 @@
                         <table class="table table-bordered">
                             <tbody><tr>
                                 <th style="width: 10px">ID</th>
-                                <th>Tên Môn Thể Thao  </th>
-                                <th>Số đội tham gia  </th>
-                                <th>Trạng thái</th>
+                                <th>Tên Môn Thể Thao</th>
+                                <th>Thể thức thi đấu</th>
+                                <th>Số đội tham gia</th>
+                                <th>Ngày bắt đầu</th> <!-- Cột mới -->
+                                <th>Ngày kết thúc</th> <!-- Cột mới -->
                                 <th>Tiến trình</th>
+                                <th>Trạng thái</th>
                                 <th>Action</th>
                             </tr>
 
                             <tr th:each="sport : ${list}">
-                                <td></td>
+                                <td th:text="${sport.id}"></td>
                                 <td th:text="${sport.sportName}"></td>
+                                <td th:text="${sport.getFormat().getFormatName()}"></td>
                                 <td th:text="${sport.numberTeamMax}"></td>
-                                <td th:text="${sport.status == 0 ? 'Đã xóa' : 'Active'}">Status</td>
-                               <td> <span class="badge bg-red" th:attr="data-startDate=${sport.startDate},data-endDate=${sport.endDate}">0%</span></td>
+
+                                <td th:text="${#temporals.format(sport.startDate, 'dd/MM/yyyy')}"></td> <!-- Ngày bắt đầu -->
+                                <td th:text="${#temporals.format(sport.endDate, 'dd/MM/yyyy')}"></td>   <!-- Ngày kết thúc -->
+
+                                <td>
+                                    <span class="badge bg-red" th:attr="data-startDate=${sport.startDate},data-endDate=${sport.endDate}">0%</span>
+                                </td>
+                                <td th:text="${sport.status == -1 ? 'Đã xóa' : (sport.status == 0 ? 'Đóng đăng ký' : 'Mở đăng ký')}"></td>
                                 <td>
                                     <a th:href="@{/admin/edit-sport/{id}(id=${sport.id})}" class="btn btn-success">Edit</a>
                                     <form th:action="@{/admin/delete-sport/{id}(id=${sport.id})}" method="post" onsubmit="return confirm('Are you sure?')">
@@ -76,6 +86,7 @@
                                     </form>
                                 </td>
                             </tr>
+
 
                             </tbody></table>
                                                 <ul class="pagination pagination-sm no-margin pull-right">
