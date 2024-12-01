@@ -3,6 +3,8 @@ package com.hutech.hoithao.repository;
 import com.hutech.hoithao.models.Group;
 import com.hutech.hoithao.models.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,4 +23,11 @@ public interface TeamRepository extends JpaRepository<Team, Integer> {
     List<Team> findBySportIdOrderByNoFinalAsc(Integer id);
 
     long countBySportIdAndStatus(Integer sportId, int status);
+    List<Team> findByStatusIn(List<Integer> statuses);
+
+    List<Team> findBySportIdAndStatusIn(Integer sportId, List<Integer> statuses);
+    @Query("SELECT t FROM Team t WHERE t.sport.id = :idSport AND t.group IS NULL AND t.status = 2")
+    List<Team> findTeamsNotInAnyGroupBySport(@Param("idSport") Integer idSport);
+    @Query("SELECT t FROM Team t WHERE t.group.id = :groupId")
+    List<Team> findTeamsByGroupId(@Param("groupId") Integer groupId);
 }

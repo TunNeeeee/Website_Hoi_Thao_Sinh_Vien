@@ -1,5 +1,7 @@
 package com.hutech.hoithao.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -87,7 +89,8 @@ public class Team {
     private Set<RuleDetail> listRuleDetail = new HashSet<>();
 
     // Nhóm mà team thuộc về
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "id_group")
     private Group group;
 

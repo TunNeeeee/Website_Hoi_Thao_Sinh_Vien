@@ -1,23 +1,20 @@
 package com.hutech.hoithao.controller.Admin;
 
-import com.hutech.hoithao.models.Event;
-import com.hutech.hoithao.models.Format;
-import com.hutech.hoithao.models.Sport;
-import com.hutech.hoithao.models.Status_Event;
-import com.hutech.hoithao.service.EventService;
-import com.hutech.hoithao.service.FormatService;
-import com.hutech.hoithao.service.SportService;
+import com.hutech.hoithao.exceptions.ResourceNotFoundException;
+import com.hutech.hoithao.models.*;
+import com.hutech.hoithao.service.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -29,6 +26,10 @@ public class SportController {
     private EventService eventService;
     @Autowired
     private FormatService formatService;
+    @Autowired
+    private TeamService teamService;
+    @Autowired
+    private GroupService groupService;
     @GetMapping("/sport")
     public String index(Model model, @Param("keyword") String keyword, @RequestParam(name="pageNo",defaultValue = "1") Integer pageNo) {
         Page<Sport> page;
@@ -160,7 +161,18 @@ public class SportController {
         // Chuyển hướng về trang danh sách sự kiện sau khi cập nhật thành công
         return "redirect:/admin/sport";
     }
-
+    @GetMapping("/team-list/{sportId}")
+    public String getTeamListBySport(@PathVariable Integer sportId, Model model) {
+        List<Team> approvedTeams = teamService.findTeamsByStatus(sportId, List.of(2)); // Được duyệt / Không được duyệt
+        List<Team> pendingTeams = teamService.findTeamsByStatus(sportId, List.of(1));      // Chưa duyệt
+        List<Team> rejectedTeams = teamService.findTeamsByStatus(sportId, List.of(-1));
+        Sport sport = sportService.findById(sportId);
+        model.addAttribute("sport", sport);
+        model.addAttribute("approvedTeams", approvedTeams);
+        model.addAttribute("pendingTeams", pendingTeams);
+        model.addAttribute("rejectedTeams", rejectedTeams);
+        return "admin/team/team-list"; // Tên file Thymeleaf hiển thị danh sách team
+    }
 
 
 
@@ -171,4 +183,70 @@ public class SportController {
         sportService.update(sport);
         return "redirect:/admin/event";
     }
+    @GetMapping("/{idSport}/groups")
+    public String viewGroups(@PathVariable Integer idSport, Model model) {
+        Sport sport = sportService.getSportById(idSport);
+
+        if (sport == null) {
+            model.addAttribute("errorMessage", "Môn thể thao không tồn tại.");
+            return "error/404";
+        }
+
+        List<Group> groups = groupService.getGroupsBySport(idSport);
+        List<Team> teamsNotInGroup = teamService.getTeamsNotInAnyGroup(idSport);
+
+        model.addAttribute("sport", sport);
+        model.addAttribute("groups", groups);
+        model.addAttribute("teamsNotInGroup", teamsNotInGroup);
+
+        return "admin/groups/list";
+    }
+
+    @PostMapping("/{idSport}/create-group")
+    public String createGroup(@PathVariable Integer idSport, RedirectAttributes redirectAttributes) {
+        Sport sport = sportService.getSportById(idSport);
+
+        if (sport == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Môn thể thao không tồn tại.");
+            return "redirect:/admin/"+idSport+"/groups";
+        }
+
+        // Tạo bảng đấu mới
+        String nextGroupName = groupService.generateNextGroupName(idSport); // Tự động đặt tên từ A -> Z
+        Group newGroup = new Group();
+        newGroup.setGroupName(nextGroupName);
+        newGroup.setSport(sport);
+
+        groupService.saveGroup(newGroup);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Tạo bảng đấu thành công!");
+        return "redirect:/admin/" + idSport + "/groups";
+    }
+    @PostMapping("/{idSport}/add-teams-to-group")
+    public String addTeamsToGroup(@PathVariable Integer idSport,
+                                  @RequestParam Integer groupId,
+                                  @RequestParam List<Integer> teamIds, // Danh sách ID các đội
+                                  RedirectAttributes redirectAttributes) {
+        Group group = groupService.getGroupById(groupId);
+
+        if (group == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bảng đấu không tồn tại.");
+            return "redirect:/admin/sport/" + idSport + "/groups";
+        }
+
+        List<Team> selectedTeams = teamService.getTeamsByIds(teamIds);
+
+        for (Team team : selectedTeams) {
+            group.getListTeam().add(team); // Thêm đội vào bảng đấu
+            team.setGroup(group);         // Gắn bảng đấu vào đội
+        }
+
+        groupService.saveGroup(group);
+        teamService.saveAll(selectedTeams);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Thêm đội vào bảng đấu thành công!");
+        return "redirect:/admin/sport/" + idSport + "/groups";
+    }
+
+
 }

@@ -1,4 +1,5 @@
 package com.hutech.hoithao.models;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,8 +20,11 @@ public class Group {
     @Column
     private String groupName;
     //ID Sport
-    @Column
-    private Integer id_sport; ;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_sport", nullable = false)
+    private Sport sport; // Thêm quan hệ với Sport
     @OneToMany(mappedBy = "group")
+    @JsonManagedReference
     private List<Team> listTeam;
+
 }

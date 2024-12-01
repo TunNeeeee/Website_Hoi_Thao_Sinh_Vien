@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Tạo Trận Đấu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Tạo Trận Đấu</h1>
+
+    <form th:action="@{/admin/{idSport}/matches/save(idSport=${idSport})}" method="post">
+        <!-- Tên trận đấu -->
+        <div class="mb-3">
+            <label for="matchName" class="form-label">Tên Trận Đấu</label>
+            <input type="text" id="matchName" name="matchName" class="form-control" placeholder="Nhập tên trận đấu" required>
+        </div>
+
+        <!-- Chọn bảng đấu -->
+        <div class="mb-3">
+            <label for="group" class="form-label">Chọn Bảng Đấu</label>
+            <select id="group" name="groupId" class="form-select" required>
+                <option value="" disabled selected>--- Chọn Bảng ---</option>
+                <option th:each="group : ${groups}" th:value="${group.id}" th:text="'Bảng ' + ${group.groupName}"></option>
+            </select>
+        </div>
+
+        <!-- Chọn địa điểm thi đấu -->
+        <div class="mb-3">
+            <label for="arena" class="form-label">Chọn Địa Điểm Thi Đấu</label>
+            <select id="arena" name="arena.id" class="form-select" required>
+                <option value="" disabled selected>--- Chọn Địa Điểm ---</option>
+                <option th:each="arena : ${arenas}" th:value="${arena.id}" th:text="${arena.nameArena}"></option>
+            </select>
+        </div>
+
+        <!-- Chọn đội 1 -->
+        <div class="mb-3">
+            <label for="team1" class="form-label">Chọn Đội 1</label>
+            <select id="team1" name="team1.id" class="form-select" required>
+                <option value="" disabled selected>--- Chọn Đội 1 ---</option>
+            </select>
+        </div>
+
+        <!-- Chọn đội 2 -->
+        <div class="mb-3">
+            <label for="team2" class="form-label">Chọn Đội 2</label>
+            <select id="team2" name="team2.id" class="form-select" required>
+                <option value="" disabled selected>--- Chọn Đội 2 ---</option>
+            </select>
+        </div>
+
+        <!-- Chọn ngày thi đấu -->
+        <div class="mb-3">
+            <label for="time" class="form-label">Ngày Thi Đấu</label>
+            <input type="date" id="time" name="time" class="form-control" required>
+        </div>
+
+        <!-- Chọn giờ bắt đầu -->
+        <div class="mb-3">
+            <label for="timeStart" class="form-label">Thời Gian Bắt Đầu</label>
+            <input type="time" id="timeStart" name="timeStart" class="form-control" required>
+        </div>
+
+<!--        &lt;!&ndash; Điểm số đội 1 &ndash;&gt;-->
+<!--        <div class="mb-3">-->
+<!--            <label for="point1" class="form-label">Điểm Số Đội 1</label>-->
+<!--            <input type="number" id="point1" name="point1" class="form-control" min="0" placeholder="Nhập điểm số đội 1" required>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Điểm số đội 2 &ndash;&gt;-->
+<!--        <div class="mb-3">-->
+<!--            <label for="point2" class="form-label">Điểm Số Đội 2</label>-->
+<!--            <input type="number" id="point2" name="point2" class="form-control" min="0" placeholder="Nhập điểm số đội 2" required>-->
+<!--        </div>-->
+
+        <button type="submit" class="btn btn-primary">Lưu Trận Đấu</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('group').addEventListener('change', function () {
+        const groupId = this.value;
+
+        // Lấy idSport từ URL
+        const pathArray = window.location.pathname.split('/');
+        const idSport = pathArray[2]; // idSport là phần thứ 2 trong URL
+
+        const team1Select = document.getElementById('team1');
+        const team2Select = document.getElementById('team2');
+
+        // Reset dropdown
+        team1Select.innerHTML = '<option value="" disabled selected>--- Chọn Đội 1 ---</option>';
+        team2Select.innerHTML = '<option value="" disabled selected>--- Chọn Đội 2 ---</option>';
+
+        if (groupId) {
+            fetch(`/admin/${idSport}/groups/${groupId}/teams`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(teams => {
+                    console.log('Teams fetched:', teams); // Debug danh sách đội
+
+                    // Thêm các đội vào dropdown
+                    teams.forEach(team => {
+                        const option1 = document.createElement('option');
+                        option1.value = team.id;
+                        option1.textContent = team.teamName;
+                        team1Select.appendChild(option1);
+
+                        const option2 = document.createElement('option');
+                        option2.value = team.id;
+                        option2.textContent = team.teamName;
+                        team2Select.appendChild(option2);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching teams:', error);
+                    alert('Không thể tải danh sách đội. Vui lòng thử lại sau.');
+                });
+        }
+    });
+
+    // Hàm xử lý khi chọn Team 1 hoặc Team 2
+    function updateTeamOptions(changedSelect, otherSelect) {
+        const selectedValue = changedSelect.value;
+
+        // Reset tất cả các option ở dropdown khác
+        Array.from(otherSelect.options).forEach(option => {
+            if (option.value === selectedValue) {
+                option.style.display = 'none'; // Ẩn đội đã chọn
+            } else {
+                option.style.display = ''; // Hiển thị lại các đội khác
+            }
+        });
+    }
+
+    const team1Select = document.getElementById('team1');
+    const team2Select = document.getElementById('team2');
+
+    // Gắn sự kiện khi thay đổi chọn đội
+    team1Select.addEventListener('change', function () {
+        updateTeamOptions(team1Select, team2Select);
+    });
+
+    team2Select.addEventListener('change', function () {
+        updateTeamOptions(team2Select, team1Select);
+    });
+</script>

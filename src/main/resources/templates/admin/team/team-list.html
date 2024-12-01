@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments/head::head"></head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+    <header th:replace="admin/fragments/header::header"></header>
+    <div th:replace="admin/fragments/sidebar::sidebar"></div>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1>Danh sách các Team</h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+                <li><a href="#">Quản lý</a></li>
+                <li class="active">Danh sách Team</li>
+            </ol>
+        </section>
+
+        <section class="content">
+            <div class="row">
+                <!-- Chưa duyệt -->
+                <div class="col-md-4">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Đội chưa duyệt <small>(Tổng: <span th:text="${#lists.size(pendingTeams)}">0</span>)</small></h3>
+                        </div>
+                        <div class="box-body">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th>Tên đội</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="team : ${pendingTeams}">
+                                    <td th:text="${team.teamName}"></td>
+                                    <td><span class="badge bg-yellow-gradient">Chưa duyệt</span></td>
+                                    <td>
+                                        <a th:href="@{/admin/team/{id}(id=${team.id})}" class="btn btn-info">Xem Chi Tiết</a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Được duyệt -->
+                <div class="col-md-4">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Đội được duyệt <small>(Tổng: <span th:text="${#lists.size(approvedTeams)}">0</span>)</small></h3>
+                        </div>
+                        <div class="box-body">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th>Tên đội</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="team : ${approvedTeams}">
+                                    <td th:text="${team.teamName}"></td>
+                                    <td><span class="badge bg-green">Được duyệt</span></td>
+                                    <td>
+                                        <a th:href="@{/admin/team/{id}(id=${team.id})}" class="btn btn-info">Xem Chi Tiết</a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <form th:action="@{/admin/{idSport}/groups(idSport=${sport.id})}"  th:if="${(sport.format.id == 1 or sport.format.id == 3) and sport.status == 0}">
+                                <button type="submit" class="btn btn-primary">Quản Lý Bảng Đấu</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Không được duyệt -->
+                <div class="col-md-4">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Đội không được duyệt <small>(Tổng: <span th:text="${#lists.size(rejectedTeams)}">0</span>)</small></h3>
+                        </div>
+                        <div class="box-body">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th>Tên đội</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="team : ${rejectedTeams}">
+                                    <td th:text="${team.teamName}"></td>
+                                    <td><span class="badge bg-purple">Không được duyệt</span></td>
+                                    <td>
+                                        <a th:href="@{/admin/team/{id}(id=${team.id})}" class="btn btn-info">Xem Chi Tiết</a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+    <footer th:replace="admin/fragments/footer::footer"></footer>
+</div>
+
+<div th:replace="admin/fragments/script::script"></div>
+</body>
+</html>
