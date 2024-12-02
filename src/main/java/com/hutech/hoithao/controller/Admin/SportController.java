@@ -14,8 +14,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
@@ -30,6 +30,8 @@ public class SportController {
     private TeamService teamService;
     @Autowired
     private GroupService groupService;
+    @Autowired
+    private MatchService matchService;
     @GetMapping("/sport")
     public String index(Model model, @Param("keyword") String keyword, @RequestParam(name="pageNo",defaultValue = "1") Integer pageNo) {
         Page<Sport> page;
@@ -193,14 +195,21 @@ public class SportController {
         }
 
         List<Group> groups = groupService.getGroupsBySport(idSport);
-        List<Team> teamsNotInGroup = teamService.getTeamsNotInAnyGroup(idSport);
+        Map<Integer, List<Team>> sortedTeamsByGroup = new HashMap<>();
 
+        for (Group group : groups) {
+            List<Team> sortedTeams = teamService.getSortedTeamsByGroup(group.getId());
+            sortedTeamsByGroup.put(group.getId(), sortedTeams);
+        }
+        model.addAttribute("teamsNotInGroup", teamService.getTeamsNotInAnyGroup(idSport));
+        model.addAttribute("matches", matchService.findMatchesBySport(idSport)); // Lấy danh sách trận đấu
         model.addAttribute("sport", sport);
         model.addAttribute("groups", groups);
-        model.addAttribute("teamsNotInGroup", teamsNotInGroup);
+        model.addAttribute("sortedTeamsByGroup", sortedTeamsByGroup); // Gửi danh sách đã sắp xếp
 
         return "admin/groups/list";
     }
+
 
     @PostMapping("/{idSport}/create-group")
     public String createGroup(@PathVariable Integer idSport, RedirectAttributes redirectAttributes) {
@@ -231,7 +240,7 @@ public class SportController {
 
         if (group == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bảng đấu không tồn tại.");
-            return "redirect:/admin/sport/" + idSport + "/groups";
+            return "redirect:/admin/" + idSport + "/groups";
         }
 
         List<Team> selectedTeams = teamService.getTeamsByIds(teamIds);
@@ -245,8 +254,58 @@ public class SportController {
         teamService.saveAll(selectedTeams);
 
         redirectAttributes.addFlashAttribute("successMessage", "Thêm đội vào bảng đấu thành công!");
-        return "redirect:/admin/sport/" + idSport + "/groups";
+        return "redirect:/admin/" + idSport + "/groups";
     }
 
+    @PostMapping("/{idSport}/save-results/{groupId}")
+    public String saveResults(@PathVariable Integer idSport, @PathVariable Integer groupId, RedirectAttributes redirectAttributes) {
+        Sport sport = sportService.findById(idSport);
+        Group group = groupService.getGroupById(groupId);
+        List<Team> teams = teamService.getSortedTeamsByGroup(groupId);
+
+        if (sport.getFormat().getId() == 1) {
+            // Format 1: Cập nhật thứ tự vào noFinal
+            for (int i = 0; i < teams.size(); i++) {
+                teams.get(i).setNoFinal(i + 1);
+                teamService.saveTeam(teams.get(i));
+            }
+        } else if (sport.getFormat().getId() == 3) {
+            // Format 3: Chuyển 2 đội cao nhất vào vòng tiếp theo
+            for (int i = 0; i < teams.size(); i++) {
+                if (i < 2) {
+                    // 2 đội đứng đầu: Đi tiếp
+                    teams.get(i).setStatus(2);
+                    teams.get(i).setNoRank(i+1);
+                } else {
+                    // Các đội khác: Bị loại
+                    teams.get(i).setStatus(0);
+                    teams.get(i).setNoRank(i+1);
+                }
+                teamService.saveTeam(teams.get(i));
+            }
+        }
+
+        redirectAttributes.addFlashAttribute("success", "Kết quả đã được lưu thành công!");
+        return "redirect:/admin/" + idSport + "/groups";
+    }
+    @GetMapping("/{idSport}/ranking")
+    public String viewRanking(@PathVariable Integer idSport, Model model) {
+        Sport sport = sportService.getSportById(idSport);
+        List<Team> teams = teamService.getTeamsBySportSortedByRanking(idSport); // Lấy danh sách đội xếp hạng
+        if (teams.size() >= 3) {
+            model.addAttribute("champion", teams.get(0)); // Vô địch
+            model.addAttribute("runnerUp", teams.get(1)); // Á quân
+            model.addAttribute("thirdPlace", teams.get(2)); // Hạng 3
+        }
+        // Lọc các đội có status = 2 và sắp xếp theo noFinal
+        List<Team> rankedTeams = teamService.getTeamsBySportSortedByRanking(idSport)
+                .stream()
+                .filter(team -> team.getStatus() == 2)
+                .sorted(Comparator.comparingInt(Team::getNoFinal))
+                .toList();
+        model.addAttribute("sport", sport);
+        model.addAttribute("teams", rankedTeams); // Toàn bộ đội xếp hạng
+        return "admin/rank/ranking"; // Trả về view "ranking.html"
+    }
 
 }

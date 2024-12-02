@@ -8,12 +8,12 @@
 <div class="container mt-4">
     <h1 class="text-center mb-4">Tạo Trận Đấu</h1>
 
-    <form th:action="@{/admin/{idSport}/matches/save(idSport=${idSport})}" method="post">
-        <!-- Tên trận đấu -->
-        <div class="mb-3">
-            <label for="matchName" class="form-label">Tên Trận Đấu</label>
-            <input type="text" id="matchName" name="matchName" class="form-control" placeholder="Nhập tên trận đấu" required>
-        </div>
+    <form th:action="@{/admin/{idSport}/create-match-vb(idSport=${idSport})}" method="post">
+<!--        &lt;!&ndash; Tên trận đấu &ndash;&gt;-->
+<!--        <div class="mb-3">-->
+<!--            <label for="matchName" class="form-label">Tên Trận Đấu</label>-->
+<!--            <input type="text" id="matchName" name="matchName" class="form-control" placeholder="Nhập tên trận đấu" required>-->
+<!--        </div>-->
 
         <!-- Chọn bảng đấu -->
         <div class="mb-3">
@@ -29,7 +29,7 @@
             <label for="arena" class="form-label">Chọn Địa Điểm Thi Đấu</label>
             <select id="arena" name="arena.id" class="form-select" required>
                 <option value="" disabled selected>--- Chọn Địa Điểm ---</option>
-                <option th:each="arena : ${arenas}" th:value="${arena.id}" th:text="${arena.nameArena}"></option>
+                <option th:each="arena : ${arenas}" th:value="${arena.id}" th:text="${arena.capacity}+' - '+${arena.nameArena}"></option>
             </select>
         </div>
 

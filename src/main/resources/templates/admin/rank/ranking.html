@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Bảng Xếp Hạng Tổng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .ranking-card {
+            background: linear-gradient(145deg, #e6e6e6, #ffffff);
+            border-radius: 15px;
+            box-shadow: 3px 3px 6px #ccc, -3px -3px 6px #fff;
+        }
+        .medal {
+            font-size: 50px;
+        }
+        .medal.gold { color: gold; }
+        .medal.silver { color: silver; }
+        .medal.bronze { color: #cd7f32; }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <h1 class="text-center mb-4">🏆 Bảng Xếp Hạng Tổng 🏆</h1>
+
+    <!-- Vô địch, á quân, hạng 3 -->
+    <div class="row text-center">
+
+
+        <!-- Á quân -->
+        <div class="col-md-4">
+            <div class="ranking-card p-4">
+                <div class="medal silver">
+                    <i class="fas fa-medal"></i>
+                </div>
+                <h2 class="text-uppercase text-secondary" th:text="${runnerUp.teamName}">Team Name</h2>
+                <h4>🥈 Á Quân</h4>
+            </div>
+        </div>
+        <!-- Vô địch -->
+        <div class="col-md-4">
+            <div class="ranking-card p-4">
+                <div class="medal gold">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <h2 class="text-uppercase text-primary" th:text="${champion.teamName}">Team Name</h2>
+                <h4>🥇 Vô Địch</h4>
+            </div>
+        </div>
+        <!-- Hạng 3 -->
+        <div class="col-md-4">
+            <div class="ranking-card p-4">
+                <div class="medal bronze">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h2 class="text-uppercase text-warning" th:text="${thirdPlace.teamName}">Team Name</h2>
+                <h4>🥉 Hạng 3</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách xếp hạng -->
+    <h2 class="text-center mt-5">📋 Danh Sách Đội Xếp Hạng</h2>
+    <table class="table table-bordered table-striped mt-3">
+        <thead class="table-dark">
+        <tr>
+            <th>Hạng</th>
+            <th>Tên Đội</th>
+            <th>Số Trận</th>
+            <th>Điểm Số</th>
+            <th>Hiệu Số</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="team, iter : ${teams}">
+            <td th:text="${iter.index + 1}"></td>
+            <td th:text="${team.teamName}"></td>
+            <td th:text="${team.numberGame}"></td>
+            <td th:text="${team.point}"></td>
+            <td th:text="${team.hs}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="text-center mt-4">
+        <a th:href="@{/admin/{idSport}/groups(idSport=${sport.id})}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

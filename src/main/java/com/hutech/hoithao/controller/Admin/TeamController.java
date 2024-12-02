@@ -65,12 +65,15 @@ public class TeamController {
     @PostMapping("/approve/{id}")
     public String approveTeam(@PathVariable Integer id) {
         Team team = teamService.findTeamById(id);
+
         if (team != null) {
             Sport sport = team.getSport();
 
             if (sport != null) {
+                Integer idSport = sport.getId(); // Lấy idSport từ đối tượng Sport
+
                 // Kiểm tra số lượng đội đã duyệt cho môn thể thao này
-                long approvedTeamsCount = teamService.countApprovedTeamsBySport(sport.getId());
+                long approvedTeamsCount = teamService.countApprovedTeamsBySport(idSport);
 
                 // Nếu số lượng đội đã đạt giới hạn cho môn thể thao này
                 if (approvedTeamsCount >= sport.getNumberTeamMax()) {
@@ -80,20 +83,25 @@ public class TeamController {
 
                 // Duyệt đội
                 team.setStatus(2);  // Trạng thái 'Đã duyệt'
+                team.setNumberGame(0);
+                team.setPoint(0);
+                team.setHs(0);
                 teamService.saveTeam(team);
 
                 // Cập nhật trạng thái môn thể thao nếu số lượng đội đã duyệt đạt giới hạn
-                approvedTeamsCount = teamService.countApprovedTeamsBySport(sport.getId());
+                approvedTeamsCount = teamService.countApprovedTeamsBySport(idSport);
                 if (approvedTeamsCount >= sport.getNumberTeamMax()) {
                     sport.setStatus(0); // Môn thể thao đã đủ đội
                     sportService.saveSport(sport);
                 }
+
+                // Redirect về danh sách đội của môn thể thao này
+                return "redirect:/admin/team-list/" + idSport;
             }
         }
-        return "redirect:/admin/team";
+        // Nếu không tìm thấy team hoặc sport
+        return "redirect:/admin/team?error=notFound";
     }
-
-
 
     @PostMapping("/reject/{id}")
     public String rejectTeam(@PathVariable Integer id) {

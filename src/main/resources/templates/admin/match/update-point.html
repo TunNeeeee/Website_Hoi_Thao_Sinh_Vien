@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Cập Nhật Kết Quả</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center">Cập Nhật Kết Quả Trận Đấu</h1>
+
+    <!-- Thông báo lỗi/success -->
+    <div th:if="${error}" class="alert alert-danger text-center">
+        <span th:text="${error}"></span>
+    </div>
+    <div th:if="${success}" class="alert alert-success text-center">
+        <span th:text="${success}"></span>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0" th:text="${match.matchName}"></h4>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/admin/{idSport}/update-point/{matchId}(idSport=${sportId}, matchId=${match.id})}" method="post">
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold" th:text="${match.team1.teamName} + ' Điểm'"></label>
+                        <input type="number"
+                               class="form-control"
+                               name="newPoint1"
+                               th:value="${match.point1 != -1 ? match.point1 : ''}"
+                               min="0"
+                               required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold" th:text="${match.team2.teamName} + ' Điểm'"></label>
+                        <input type="number"
+                               class="form-control"
+                               name="newPoint2"
+                               th:value="${match.point2 != -1 ? match.point2 : ''}"
+                               min="0"
+                               required>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Lưu Kết Quả
+                    </button>
+                    <a th:href="@{/admin/{idSport}/groups(idSport=${sportId})}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay Lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

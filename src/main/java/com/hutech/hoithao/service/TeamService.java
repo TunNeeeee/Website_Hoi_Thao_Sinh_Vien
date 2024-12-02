@@ -5,7 +5,9 @@ import com.hutech.hoithao.repository.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TeamService {
@@ -45,4 +47,25 @@ public class TeamService {
     public List<Team> saveAll(List<Team> teams) {
         return teamRepository.saveAll(teams);
     }
+    public List<Team> getSortedTeamsByGroup(Integer groupId) {
+        List<Team> teams = teamRepository.findSortedTeamsByGroup(groupId);
+        // Sắp xếp theo điểm (giảm dần), nếu bằng thì xét hiệu số
+        teams.sort((team1, team2) -> {
+            int pointCompare = team2.getPoint().compareTo(team1.getPoint());
+            if (pointCompare != 0) {
+                return pointCompare;
+            }
+            // Nếu điểm bằng nhau, so sánh hiệu số
+            return team2.getHs().compareTo(team1.getHs());
+        });
+        return teams;
+    }
+    public List<Team> getTeamsBySportSortedByRanking(Integer sportId) {
+        List<Team> teams = teamRepository.findBySportId(sportId);
+        return teams.stream()
+                .sorted(Comparator.comparingInt(Team::getPoint).reversed()
+                        .thenComparingInt(Team::getHs).reversed())
+                .collect(Collectors.toList());
+    }
+
 }

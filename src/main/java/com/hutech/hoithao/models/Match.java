@@ -30,10 +30,14 @@ public class Match {
     private Team team1;
     @Column(name = "point1")
     private int point1;
+    @Column(name = "bonuspoint1")
+    private int bonuspoint1;
     @ManyToOne
     private Team team2;
     @Column(name = "point2")
     private int point2;
+    @Column(name = "bonuspoint2")
+    private int bonuspoint2;
     @ManyToOne
     @JoinColumn(name="id_arena")
     private Arena arena;

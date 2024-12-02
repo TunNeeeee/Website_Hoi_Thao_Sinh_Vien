@@ -17,20 +17,6 @@ public class GroupService {
 
     @Autowired
     private GroupRepository groupRepository;
-    @Autowired
-    private TeamRepository teamRepository;
-    public void createGroupsForSport(Sport sport) {
-        // Giả sử số bảng đấu cần tạo = số đội tối đa / 4 (4 đội mỗi bảng)
-        int numberOfTeams = sport.getNumberTeamMax();
-        int numberOfGroups = (int) Math.ceil((double) numberOfTeams / 4);
-
-        for (int i = 1; i <= numberOfGroups; i++) {
-            Group group = new Group();
-            group.setGroupName("Bảng " + i);
-            group.setSport(sport); // Gán môn thể thao vào bảng đấu
-            groupRepository.save(group);
-        }
-    }
     public List<Group> getGroupsBySport(Integer sportId) {
         return groupRepository.findBySportId(sportId);
     }
