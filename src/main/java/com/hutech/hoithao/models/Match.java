@@ -29,19 +29,21 @@ public class Match {
     @ManyToOne
     private Team team1;
     @Column(name = "point1")
-    private int point1;
+    private Integer point1;
     @Column(name = "bonuspoint1")
-    private int bonuspoint1;
+    private Integer bonuspoint1;
     @ManyToOne
     private Team team2;
     @Column(name = "point2")
-    private int point2;
+    private Integer point2;
     @Column(name = "bonuspoint2")
-    private int bonuspoint2;
+    private Integer bonuspoint2;
+    @Column(name = "winner")
+    private Integer winner;
     @ManyToOne
-    @JoinColumn(name="id_arena")
+    @JoinColumn(name = "id_arena")
     private Arena arena;
     @ManyToOne
-    @JoinColumn(name="id_round")
+    @JoinColumn(name = "id_round")
     private Round round;
 }

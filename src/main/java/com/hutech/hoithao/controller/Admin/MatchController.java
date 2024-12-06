@@ -1,11 +1,12 @@
 package com.hutech.hoithao.controller.Admin;
 
+import com.hutech.hoithao.domains.dtos.TeamDTO;
 import com.hutech.hoithao.models.*;
-import com.hutech.hoithao.repository.ArenaRepository;
 import com.hutech.hoithao.repository.GroupRepository;
-import com.hutech.hoithao.repository.MatchRepository;
 import com.hutech.hoithao.service.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,33 +17,21 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/{idSport}")
+@RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class MatchController {
-
-    @Autowired
     private GroupRepository groupRepository;
-
-    @Autowired
-    private MatchRepository matchRepository;
-
-    @Autowired
     private GroupService groupService;
-
-    @Autowired
     private SportService sportService;
-
-    @Autowired
     private ArenaService arenaService;
-
-    @Autowired
     private MatchService matchService;
-
-    @Autowired
     private TeamService teamService;
+    private RoundService roundService;
+
     // Trang tạo trận đấu
     @GetMapping("/create-match-vb")
     public String showCreateMatchForm(@PathVariable Integer idSport, Model model) {
@@ -51,6 +40,7 @@ public class MatchController {
         model.addAttribute("arenas", arenaService.findAll());
         return "/admin/match/create-match";
     }
+
     // Lấy danh sách đội theo bảng (API)
     @GetMapping("/groups/{groupId}/teams")
     @ResponseBody
@@ -61,8 +51,6 @@ public class MatchController {
                         .toList())
                 .orElse(Collections.emptyList());
     }
-
-
 
     // Lưu thông tin trận đấu
     @PostMapping("/create-match-vb")
@@ -100,6 +88,7 @@ public class MatchController {
         redirectAttributes.addFlashAttribute("successMessage", "Lưu trận đấu thành công!");
         return "redirect:/admin/" + idSport + "/groups";
     }
+
     @GetMapping("/update-match/{matchId}")
     public String showUpdateMatchForm(@PathVariable Integer idSport, @PathVariable Integer matchId, Model model) {
         Match match = matchService.findById(matchId); // Tìm trận đấu theo ID
@@ -145,8 +134,8 @@ public class MatchController {
             team1.setPoint(team1.getPoint() + 1); // Hòa
             team2.setPoint(team2.getPoint() + 1); // Hòa
         }
-        team1.setHs(team1.getHs()+(point1-point2));
-        team2.setHs(team2.getHs()+point2-point1);
+        team1.setHs(team1.getHs() + (point1 - point2));
+        team2.setHs(team2.getHs() + point2 - point1);
         // Lưu các thay đổi
         teamService.saveTeam(team1);
         teamService.saveTeam(team2);
@@ -158,6 +147,7 @@ public class MatchController {
         redirectAttributes.addFlashAttribute("success", "Cập nhật kết quả thành công!");
         return "redirect:/admin/" + idSport + "/groups"; // Điều hướng về danh sách trận đấu
     }
+
     @GetMapping("/update-point/{matchId}")
     public String showUpdatePointForm(@PathVariable Integer idSport, @PathVariable Integer matchId, Model model) {
         Match match = matchService.findById(matchId); // Tìm trận đấu theo ID
@@ -168,6 +158,7 @@ public class MatchController {
         model.addAttribute("sportId", idSport);
         return "admin/match/update-point"; // Tên view Thymeleaf
     }
+
     @PostMapping("/update-point/{matchId}")
     public String updateMatchResult(@PathVariable Integer idSport, @PathVariable Integer matchId,
                                     @RequestParam int newPoint1, @RequestParam int newPoint2) {
@@ -233,4 +224,186 @@ public class MatchController {
             team2.setPoint(team2.getPoint() + 1);
         }
     }
+
+    //-----------------------------------------------------------------------------------------//
+    @GetMapping("/updateMatch/{team1Id}/{team2Id}/{roundId}")
+    public String showUpdateForm(
+            @PathVariable Integer team1Id,
+            @PathVariable Integer team2Id,
+            @PathVariable("idSport") Integer sportId,
+            @PathVariable Integer roundId,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        // Tìm team1 và team2
+        Team team1 = teamService.findTeamById(team1Id);
+        Team team2 = teamService.findTeamById(team2Id);
+
+        if (team1 == null || team2 == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Đội tham gia không hợp lệ!");
+            return "redirect:/admin/sport";
+        }
+
+        // Kiểm tra nếu trận đấu đã tồn tại
+        Match existingMatch = matchService.findByTeams(team1, team2);
+
+        if (existingMatch == null) {
+            // Lấy thông tin môn thi đấu
+            Sport sport = sportService.findSportByTeam(team1); // Ví dụ: dựa vào team để lấy môn
+            if (sport == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không xác định được môn thi đấu!");
+                return "redirect:/admin/sport";
+            }
+
+            // Lấy viết tắt môn thi đấu và vòng đấu
+            String sportAbbreviation = getAbbreviation(sport.getSportName()); // Viết tắt của môn
+            String roundAbbreviation = "PO"; // Vòng Playoff viết tắt
+
+            // Tạo mã trận đấu
+            String matchCode = sportAbbreviation + "-" + roundAbbreviation + "-" + team1Id + "-" + team2Id;
+
+            // Tạo mới trận đấu
+            Match newMatch = new Match();
+            newMatch.setTeam1(team1);
+            newMatch.setTeam2(team2);
+            newMatch.setMatchName(matchCode); // Đặt tên mặc định
+            newMatch.setPoint1(-1);
+            newMatch.setPoint2(-1);
+            newMatch.setBonuspoint1(-1);
+            newMatch.setBonuspoint2(-1);
+
+            // Lưu trận đấu vào DB
+            existingMatch = matchService.saveMatch(newMatch);
+        }
+
+        model.addAttribute("roundId", roundId);
+        model.addAttribute("sportId", sportId);
+        model.addAttribute("teams", teamService.findAllTeams());
+        // Gửi thông tin trận đấu đến view để cập nhật
+        model.addAttribute("match", existingMatch);
+        model.addAttribute("arenas", arenaService.findAll());
+        return "admin/playoff/create_match";
+    }
+
+    /**
+     * Hàm lấy viết tắt của tên (Ví dụ: "Bóng Đá" -> "BD").
+     */
+    private String getAbbreviation(String name) {
+        if (name == null || name.isEmpty()) return "";
+        return Arrays.stream(name.split("\\s+"))
+                .map(word -> word.substring(0, 1).toUpperCase())
+                .collect(Collectors.joining());
+    }
+
+
+    @PostMapping("/updateMatch/{matchId}/{roundId}")
+    public String updateMatch(@PathVariable Integer matchId,
+                              @ModelAttribute Match match,
+                              @PathVariable Integer roundId,
+                              @RequestParam("arenaId") Integer arenaId,
+                              RedirectAttributes redirectAttributes) {
+        // Tìm trận đấu theo matchId
+        Match existingMatch = matchService.findById(matchId);
+
+//         Tìm kiếm đội 1 và đội 2 từ ID của các đội được gửi từ form
+        Team team1 = teamService.findTeamById(match.getTeam1().getId());  // Ensure this gets the team object
+        Team team2 = teamService.findTeamById(match.getTeam2().getId());  // Ensure this gets the team object
+
+        // Kiểm tra nếu đội 1 hoặc đội 2 không tồn tại
+//        if (team1 == null || team2 == null) {
+//            redirectAttributes.addFlashAttribute("errorMessage", "Đội không hợp lệ!");
+//            return "redirect:/admin/{idSport}/match";  // Or an appropriate redirect URL
+//        }
+        if (existingMatch == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Trận đấu không tồn tại!");
+            return "redirect:/admin/sport";  // Redirect về trang chính nếu trận đấu không tồn tại
+        }
+
+        // Lấy Arena từ arenaId
+        Arena arena = arenaService.findById(arenaId);
+        if (arena == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Địa điểm không hợp lệ!");
+            return "redirect:/admin/sport";
+        }
+
+        // Lấy thông tin môn thể thao từ team1 của trận đấu
+        Sport sport = team1.getSport();
+        if (sport == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Môn thể thao không hợp lệ!");
+            return "redirect:/admin/sport";
+        }
+        Round round = roundService.findById(roundId);
+        // Cập nhật thông tin trận đấu
+        existingMatch.setTeam1(match.getTeam1());
+        existingMatch.setTeam2(match.getTeam2());
+        existingMatch.setTime(match.getTime());
+        existingMatch.setTimeStart(match.getTimeStart());
+        existingMatch.setArena(arena);
+        existingMatch.setRound(round);
+        existingMatch.setPoint1(match.getPoint1());
+        existingMatch.setPoint2(match.getPoint2());
+        existingMatch.setBonuspoint1(match.getBonuspoint1());
+        existingMatch.setBonuspoint2(match.getBonuspoint2());
+        if (existingMatch.getPoint1().equals(existingMatch.getPoint2())) {
+            if (existingMatch.getBonuspoint1() != null && existingMatch.getBonuspoint2() != null) {
+                if (existingMatch.getBonuspoint1() > existingMatch.getBonuspoint2()) {
+                    existingMatch.setWinner(1);
+                } else if (existingMatch.getBonuspoint1() < existingMatch.getBonuspoint2()) {
+                    existingMatch.setWinner(2);
+                }
+            }
+        } else {
+            existingMatch.setWinner(existingMatch.getPoint1() > existingMatch.getPoint2() ? 1 : 2);
+        }
+        // Xác định số đội (noFinal) và trạng thái
+        int noFinalCurrent = 0;
+        int noFinalNext = 0;
+        switch (roundId) {
+            case 2: // Vòng 1/16
+                noFinalCurrent = 16;
+                noFinalNext = 8;
+                break;
+            case 3: // Tứ kết
+                noFinalCurrent = 8;
+                noFinalNext = 4;
+                break;
+            case 4: // Bán kết
+                noFinalCurrent = 4;
+                noFinalNext = 2;
+                break;
+            case 5: // Chung kết
+                noFinalCurrent = 2;
+                noFinalNext = 1; // Thắng sẽ là vô địch
+                break;
+            default:
+                redirectAttributes.addFlashAttribute("errorMessage", "Vòng đấu không hợp lệ!");
+                return "redirect:/admin/sport";
+        }
+
+        // Cập nhật trạng thái của các đội
+        if (existingMatch.getWinner() == 1) { // team1 thắng
+            team1.setNoFinal(noFinalNext); // Tứ kết
+            team1.setStatus(2);  // Giữ nguyên
+            team2.setNoFinal(noFinalCurrent); // Top 8
+            team2.setStatus(0);  // Bị loại
+        } else if (existingMatch.getWinner() == 2) { // team2 thắng
+            team2.setNoFinal(noFinalNext); // Tứ kết
+            team2.setStatus(2);  // Giữ nguyên
+            team1.setNoFinal(noFinalCurrent); // Top 8
+            team1.setStatus(0);  // Bị loại
+        }
+
+        // Lưu trạng thái đội
+        teamService.saveTeam(team1);
+        teamService.saveTeam(team2);
+        // Lưu trận đấu đã cập nhật
+        matchService.saveMatch(existingMatch);
+
+        // Thêm thông báo thành công
+        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trận đấu thành công!");
+
+        // Chuyển hướng về trang chi tiết trận đấu hoặc danh sách trận đấu
+        return "redirect:/admin/" + sport.getId() + "/playoff";  // Redirect tới trang playoff của môn thể thao
+    }
+
+
 }

@@ -34,4 +34,19 @@ public interface TeamRepository extends JpaRepository<Team, Integer> {
     List<Team> findTeamsByRankIdSorted(@Param("groupId") int groupId);
     @Query("SELECT t FROM Team t WHERE t.group.id = :groupId ORDER BY t.point DESC, t.hs DESC")
     List<Team> findSortedTeamsByGroup(@Param("groupId") Integer groupId);
+    @Query("SELECT t FROM Team t WHERE t.sport.id = :sportId AND t.noRank = :noRank AND t.status = :status")
+    List<Team> findBySportAndNoRankAndStatus(@Param("sportId") Integer sportId,
+                                             @Param("noRank") int noRank,
+                                             @Param("status") int status);
+    @Query("SELECT t FROM Team t WHERE t.sport.id = :sportId AND t.noRank = :noRank AND t.status = :status ORDER BY t.group.id ASC")
+    List<Team> findBySportIdAndNoRankAndStatusOrdered(
+            @Param("sportId") Integer sportId,
+            @Param("noRank") Integer noRank,
+            @Param("status") Integer status);
+    @Query("SELECT t FROM Team t WHERE t.sport.id = :sportId AND t.noRank = :noRank ORDER BY t.group.id ASC")
+    List<Team> findBySportIdAndNoRankOrdered(
+            @Param("sportId") Integer sportId,
+            @Param("noRank") Integer noRank
+           );
+
 }

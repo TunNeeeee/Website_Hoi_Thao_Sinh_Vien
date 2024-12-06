@@ -22,13 +22,14 @@ public class Role implements GrantedAuthority {
     private Integer id;
     @Column(name = "role_name")
     private String roleName;
-    @ManyToMany(mappedBy = "roles", cascade = CascadeType.ALL)
-    @ToString.Exclude
+    @ManyToMany(mappedBy = "roles", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<User> users = new HashSet<>();
+
     @Override
     public String getAuthority() {
         return roleName;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -37,6 +38,7 @@ public class Role implements GrantedAuthority {
         Role role = (Role) o;
         return getId() != null && Objects.equals(getId(), role.getId());
     }
+
     @Override
     public int hashCode() {
         return getClass().hashCode();

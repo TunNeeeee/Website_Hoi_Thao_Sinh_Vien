@@ -3,7 +3,9 @@ package com.hutech.hoithao.config;
 
 import com.hutech.hoithao.service.UserService;
 import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,13 +20,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration // Đánh dấu lớp này là một lớp cấu hình cho Spring Context.
 @EnableWebSecurity // Kích hoạt tính năng bảo mật web của Spring Security.
 @RequiredArgsConstructor // Lombok tự động tạo constructor có tham số cho tất cả các trường final.
-
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class SecurityConfig {
-    @Autowired
-    private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
-
-    @Autowired
-    private final UserService userService; // Tiêm UserService vào lớp cấu hình này.
+    CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    UserService userService; // Tiêm UserService vào lớp cấu hình này.
 
 
     @Bean

@@ -1,13 +1,15 @@
 package com.hutech.hoithao.service;
 
 
-import com.hutech.hoithao.Role;
 import com.hutech.hoithao.models.User;
 import com.hutech.hoithao.repository.IRoleRepository;
 import com.hutech.hoithao.repository.IUserRepository;
+import com.hutech.hoithao.utils.enums.Role;
 import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,25 +22,24 @@ import java.util.Optional;
 @Service
 @Slf4j
 @Transactional
+@RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class UserService implements UserDetailsService {
-    @Autowired
-    private IUserRepository userRepository;
-    @Autowired
-    private IRoleRepository roleRepository;
+    IUserRepository userRepository;
+    IRoleRepository roleRepository;
 
     // Lưu người dùng mới vào cơ sở dữ liệu sau khi mã hóa mật khẩu.
     public void save(@NotNull User user) {
-        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-        userRepository.save(user);
+//        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+//        userRepository.save(user);
     }
 
     // Gán vai trò mặc định cho người dùng dựa trên tên người dùng.
     public void setDefaultRole(String username) {
         userRepository.findByUsername(username).ifPresentOrElse(
                 user -> {
-
-                    user.getRoles().add(roleRepository.findRoleById((int) Role.USER.value));
-                    userRepository.save(user);
+//                    user.getRoles().add(roleRepository.findRoleById((int) Role.USER.value));
+//                    userRepository.save(user);
                 },
                 () -> {
                     throw new UsernameNotFoundException("User not found");

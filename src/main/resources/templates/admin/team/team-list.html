@@ -19,7 +19,7 @@
         <section class="content">
             <div class="row">
                 <!-- Chưa duyệt -->
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="box">
                         <div class="box-header with-border">
                             <h3 class="box-title">Đội chưa duyệt <small>(Tổng: <span th:text="${#lists.size(pendingTeams)}">0</span>)</small></h3>
@@ -48,7 +48,7 @@
                 </div>
 
                 <!-- Được duyệt -->
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="box">
                         <div class="box-header with-border">
                             <h3 class="box-title">Đội được duyệt <small>(Tổng: <span th:text="${#lists.size(approvedTeams)}">0</span>)</small></h3>
@@ -80,7 +80,7 @@
                 </div>
 
                 <!-- Không được duyệt -->
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="box">
                         <div class="box-header with-border">
                             <h3 class="box-title">Đội không được duyệt <small>(Tổng: <span th:text="${#lists.size(rejectedTeams)}">0</span>)</small></h3>
@@ -98,6 +98,35 @@
                                 <tr th:each="team : ${rejectedTeams}">
                                     <td th:text="${team.teamName}"></td>
                                     <td><span class="badge bg-purple">Không được duyệt</span></td>
+                                    <td>
+                                        <a th:href="@{/admin/team/{id}(id=${team.id})}" class="btn btn-info">Xem Chi Tiết</a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Đã thi đấu xong (bị loại) -->
+                <div class="col-md-3">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Đội bị loại <small>(Tổng: <span th:text="${#lists.size(eliminatedTeams)}">0</span>)</small></h3>
+                        </div>
+                        <div class="box-body">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th>Tên đội</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="team : ${eliminatedTeams}">
+                                    <td th:text="${team.teamName}"></td>
+                                    <td><span class="badge bg-red">Bị loại</span></td>
                                     <td>
                                         <a th:href="@{/admin/team/{id}(id=${team.id})}" class="btn btn-info">Xem Chi Tiết</a>
                                     </td>

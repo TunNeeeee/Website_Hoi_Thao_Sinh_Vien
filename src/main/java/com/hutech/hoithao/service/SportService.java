@@ -111,6 +111,9 @@ public class SportService {
         updateSportStatus();
     }
 
-
+    public Sport findSportByTeam(Team team) {
+        // Lấy môn thể thao liên kết với đội
+        return team.getSport(); // Trả về môn thể thao của đội
+    }
 }
 

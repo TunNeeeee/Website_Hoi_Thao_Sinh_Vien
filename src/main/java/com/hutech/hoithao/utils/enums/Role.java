@@ -1,4 +1,4 @@
-package com.hutech.hoithao;
+package com.hutech.hoithao.utils.enums;
 
 import lombok.AllArgsConstructor;
 

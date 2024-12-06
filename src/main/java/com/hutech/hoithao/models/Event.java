@@ -11,8 +11,8 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
+@RequiredArgsConstructor
 @AllArgsConstructor
-@NoArgsConstructor
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +30,7 @@ public class Event {
     @Column(name = "time_end")
     private LocalDate endDate;
     @ManyToOne
-    @JoinColumn(name="id_status")
+    @JoinColumn(name = "id_status")
     private Status_Event status;
     @OneToMany(mappedBy = "event")
     private Set<Sport> listSport;

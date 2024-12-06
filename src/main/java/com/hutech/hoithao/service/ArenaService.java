@@ -14,4 +14,7 @@ public class ArenaService {
     public List<Arena> findAll(){
         return arenaRepository.findAll();
     }
+    public Arena findById(Integer id){
+        return arenaRepository.findById(id).get();
+    }
 }

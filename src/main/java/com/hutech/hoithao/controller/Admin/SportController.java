@@ -3,7 +3,12 @@ package com.hutech.hoithao.controller.Admin;
 import com.hutech.hoithao.exceptions.ResourceNotFoundException;
 import com.hutech.hoithao.models.*;
 import com.hutech.hoithao.service.*;
+import com.hutech.hoithao.utils.mappers.MatchMapper;
+import com.hutech.hoithao.utils.mappers.TeamMapper;
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.data.domain.Page;
@@ -18,20 +23,21 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 @RequestMapping("/admin")
 public class SportController {
-    @Autowired
     private SportService sportService;
-    @Autowired
     private EventService eventService;
-    @Autowired
     private FormatService formatService;
-    @Autowired
     private TeamService teamService;
-    @Autowired
     private GroupService groupService;
-    @Autowired
     private MatchService matchService;
+    private PlayoffService playoffService;
+    private RoundService roundService;
+    TeamMapper teamMapper;
+    MatchMapper matchMapper;
+
     @GetMapping("/sport")
     public String index(Model model, @Param("keyword") String keyword, @RequestParam(name="pageNo",defaultValue = "1") Integer pageNo) {
         Page<Sport> page;
@@ -168,8 +174,10 @@ public class SportController {
         List<Team> approvedTeams = teamService.findTeamsByStatus(sportId, List.of(2)); // Được duyệt / Không được duyệt
         List<Team> pendingTeams = teamService.findTeamsByStatus(sportId, List.of(1));      // Chưa duyệt
         List<Team> rejectedTeams = teamService.findTeamsByStatus(sportId, List.of(-1));
+        List<Team> eliminatedTeams = teamService.findTeamsByStatus(sportId, List.of(0));
         Sport sport = sportService.findById(sportId);
         model.addAttribute("sport", sport);
+        model.addAttribute("eliminatedTeams", eliminatedTeams);
         model.addAttribute("approvedTeams", approvedTeams);
         model.addAttribute("pendingTeams", pendingTeams);
         model.addAttribute("rejectedTeams", rejectedTeams);
@@ -288,6 +296,252 @@ public class SportController {
         redirectAttributes.addFlashAttribute("success", "Kết quả đã được lưu thành công!");
         return "redirect:/admin/" + idSport + "/groups";
     }
+//--------------------------------------------------------------------------------------------------------------------
+
+    private List<List<Match>> generateBracketRounds(List<Match> firstRound) {
+        List<List<Match>> playoffRounds = new ArrayList<>();
+        playoffRounds.add(firstRound);
+
+        // Xử lý vòng đấu tiếp theo
+        List<Match> currentRound = firstRound;
+        while (currentRound.size() > 1) {
+            List<Match> nextRound = new ArrayList<>();
+
+            for (int i = 0; i < currentRound.size(); i += 2) {
+                Match match1 = currentRound.get(i);
+                Match match2 = currentRound.get(i + 1);
+
+                // Xác định đội thắng từ các trận trước
+                Team winner1 = getWinner(match1);
+                Team winner2 = getWinner(match2);
+
+                if (winner1 != null && winner2 != null) {
+                    Round nextRoundType = new Round();
+                    nextRoundType.setId(getNextRoundId(match1.getRound().getId()));
+
+                    Match match = matchService.findMatch(winner1, winner2, nextRoundType)
+                            .orElseGet(() -> {
+                                Match newMatch = new Match();
+                                newMatch.setTeam1(winner1);
+                                newMatch.setTeam2(winner2);
+                                newMatch.setRound(nextRoundType);
+                                return newMatch;
+                            });
+
+                    nextRound.add(match);
+                }
+            }
+
+            // Lưu các trận đấu của vòng mới
+            nextRound = matchService.saveAll(nextRound);
+            playoffRounds.add(nextRound);
+            currentRound = nextRound;
+        }
+
+        return playoffRounds;
+    }
+    private int getNextRoundId(int currentRoundId) {
+        switch (currentRoundId) {
+            case 2: return 3; // 1/16 -> Tứ kết
+            case 3: return 4; // Tứ kết -> Bán kết
+            case 4: return 5; // Bán kết -> Chung kết
+            default: throw new IllegalArgumentException("Vòng đấu không hợp lệ!");
+        }
+    }
+
+
+    private Team getWinner(Match match) {
+        if (match.getPoint1() != null && match.getPoint2() != null) {
+            if (match.getPoint1() > match.getPoint2()) {
+                return match.getTeam1();
+            } else if (match.getPoint1() < match.getPoint2()) {
+                return match.getTeam2();
+            } else {
+                System.out.println("Match ID: " + match.getId() + " ended in a draw.");
+            }
+        } else {
+            System.out.println("Match ID: " + match.getId() + " has incomplete points.");
+        }
+        return null; // Hòa hoặc chưa có điểm
+    }
+
+
+
+    public List<Match> createFirstRoundMatches(List<Team> teamsRank1, List<Team> teamsRank2) {
+        List<Match> matches = new ArrayList<>();
+        int totalGroups = teamsRank1.size();
+        int roundId = getRoundIdByTeams(totalGroups*2);
+        for (int i = 0; i < totalGroups / 2; i++) {
+            Round round = new Round();
+            round.setId(roundId);
+            // Nhánh 1
+            Team team1 = teamsRank1.get(i);
+            Team team2 = teamsRank2.get((i + 1) % totalGroups);
+            Match match1 = matchService.findMatch(team1, team2, round) // Round 1
+                    .orElseGet(() -> {
+                        Match newMatch = new Match();
+                        newMatch.setTeam1(team1);
+                        newMatch.setTeam2(team2);
+                        newMatch.setRound(round); // Vòng 1
+                        return newMatch;
+                    });
+            matches.add(match1);
+
+            // Nhánh 2
+            Team team3 = teamsRank1.get((i + totalGroups / 2) % totalGroups);
+            Team team4 = teamsRank2.get((i + totalGroups / 2 + 1) % totalGroups);
+            Match match2 = matchService.findMatch(team3, team4, round)
+                    .orElseGet(() -> {
+                        Match newMatch = new Match();
+                        newMatch.setTeam1(team3);
+                        newMatch.setTeam2(team4);
+                        newMatch.setRound(round);
+                        return newMatch;
+                    });
+            matches.add(match2);
+        }
+
+        matches = matchService.saveAll(matches);
+        return matches;
+    }
+
+    @GetMapping("/{idSport}/playoff")
+    public String playoffPage(@PathVariable("idSport") Integer idSport, Model model) {
+        // Kiểm tra sự tồn tại của môn thể thao
+        Sport sport = sportService.findById(idSport);
+        if (sport == null) {
+            model.addAttribute("error", "Môn thể thao không tồn tại.");
+            return "redirect:/admin/sports";
+        }
+
+        // Lấy danh sách các đội tham gia playoff
+        List<Team> teamsRank1 = teamService.findBySportAndNoRankOrdered(idSport, 1); // Đội nhất bảng
+        List<Team> teamsRank2 = teamService.findBySportAndNoRankOrdered(idSport, 2); // Đội nhì bảng
+
+        // Kiểm tra số lượng đội
+        if (teamsRank1.size() != teamsRank2.size()) {
+            model.addAttribute("error", "Số lượng đội giữa Nhất bảng và Nhì bảng không khớp.");
+            return "redirect:/admin/sports";
+        }
+
+        // Tạo các trận đấu vòng đầu tiên
+        List<Match> firstRound = createFirstRoundMatches(teamsRank1, teamsRank2);
+        System.out.println("=== First Round Matches ===");
+        firstRound.forEach(match -> {
+            System.out.println("Match ID: " + match.getId() + " | Team 1: " + match.getTeam1().getTeamName() + " | Team 2: " + match.getTeam2().getTeamName());
+        });
+        // Sinh các vòng đấu tiếp theo từ vòng đầu tiên
+        List<List<Match>> playoffRounds = generateBracketRounds(firstRound);
+        System.out.println("Generated Playoff Rounds: ");
+        playoffRounds.forEach((round) -> {
+            System.out.println("Round: ");
+            round.forEach(match -> {
+                System.out.println("Match ID: " + match.getId() + " | Team 1: " + match.getTeam1().getTeamName() + " | Team 2: " + match.getTeam2().getTeamName());
+            });
+        });
+        // Chuyển đổi dữ liệu sang DTO để truyền vào view
+        Map<String, List<MatchDTO>> bracketRounds = convertToBracketRoundsDTO(playoffRounds);
+
+        System.out.println(bracketRounds);
+
+        List<MatchDTO> allMatches = playoffService.getAllMatchesFromRoundId(2);
+
+        Map<String, List<MatchDTO>> groupedMatches = allMatches.stream()
+                .collect(Collectors.groupingBy(match -> {
+                    // Kiểm tra xem round có null không và lấy tên vòng đấu từ roundService
+                    if (match.getRound() != null && match.getRound().getId() != null) {
+                        // Lấy tên vòng đấu từ roundService
+                        return roundService.getRoundName(match.getRound().getId());
+                    } else {
+                        return "Unknown";  // Nếu không có thông tin vòng đấu
+                    }
+                }));
+
+        // Truyền dữ liệu vào model
+        model.addAttribute("allMatches", allMatches);
+        model.addAttribute("groupedMatches", groupedMatches);
+        model.addAttribute("sport", sport);
+        model.addAttribute("bracketRounds", bracketRounds);
+
+        return "admin/playoff/playoff-vb";
+    }
+
+    private Map<String, List<MatchDTO>> convertToBracketRoundsDTO(List<List<Match>> playoffRounds) {
+        Map<String, List<MatchDTO>> bracketRoundsDTO = new LinkedHashMap<>();
+
+        // Tổng số đội ban đầu (final để có thể sử dụng trong lambda expression)
+        final int totalTeams = playoffRounds.get(0).size() * 2;
+
+        for (int i = 0; i < playoffRounds.size(); i++) {
+            List<Match> round = playoffRounds.get(i);
+
+            // Tính số đội còn lại trong vòng này trước khi sử dụng trong lambda
+            final int teamsRemaining = totalTeams / (1 << i);  // Dùng bit shifting để thay thế Math.pow
+
+            List<MatchDTO> roundDTOs = round.stream()
+                    .map(match -> {
+                        // Chuyển đổi match thành MatchDTO
+                        MatchDTO matchDTO = matchMapper.toDTO(match);
+                        // Gán idRound cho matchDTO
+                        int roundId = getRoundIdByTeams(teamsRemaining); // Gán idRound
+                        Round round1 = new Round();
+                        round1.setId(roundId);
+                        matchDTO.setRound(round1);  // Gán idRound cho DTO
+
+                        // Thiết lập đội thắng trong MatchDTO
+                        if (match.getPoint1() != null && match.getPoint2() != null) {
+                            Integer winnerTeam = 0; // Default value ( hòa )
+                            if (match.getPoint1() > match.getPoint2()) {
+                                winnerTeam = 1;  // Đội 1 thắng
+                            } else if (match.getPoint1() < match.getPoint2()) {
+                                winnerTeam = 2;  // Đội 2 thắng
+                            }
+                            matchDTO.setWinner(winnerTeam); // Gán winner trực tiếp từ winnerTeam
+                        }
+                        matchDTO.setPoint1(match.getPoint1());
+                        matchDTO.setPoint2(match.getPoint2());
+                        return matchDTO;
+                    })
+                    .toList();
+
+            // Tính tên vòng đấu dựa trên số đội còn lại
+            String roundName = getRoundNameByTeams(teamsRemaining);
+
+            // Thêm vào map với tên vòng đấu
+            bracketRoundsDTO.put(roundName, roundDTOs);
+        }
+
+        return bracketRoundsDTO;
+    }
+
+
+
+    private int getRoundIdByTeams(int teamsRemaining) {
+        // Trả về id (kiểu int) của vòng đấu
+        switch (teamsRemaining) {
+            case 16: return 2;  // Vòng 1/16
+            case 8:  return 3;  // Tứ kết
+            case 4:  return 4;  // Bán kết
+            case 2:  return 5;  // Chung kết
+            default: return 0;  // Các vòng khác nếu có
+        }
+    }
+
+    private String getRoundNameByTeams(int teamsRemaining) {
+        // Trả về tên của vòng đấu (String)
+        switch (teamsRemaining) {
+            case 16: return "Vòng 1/16";  // Với 16 đội
+            case 8:  return "Tứ kết";     // Với 8 đội
+            case 4:  return "Bán kết";    // Với 4 đội
+            case 2:  return "Chung kết";  // Với 2 đội
+            default: return "Vòng " + teamsRemaining;  // Với số đội khác
+        }
+    }
+
+
+
+
+    //--------------------------------------------------------------------------------------------------------//
     @GetMapping("/{idSport}/ranking")
     public String viewRanking(@PathVariable Integer idSport, Model model) {
         Sport sport = sportService.getSportById(idSport);

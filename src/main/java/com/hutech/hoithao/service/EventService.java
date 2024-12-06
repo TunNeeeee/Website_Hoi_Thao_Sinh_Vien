@@ -1,33 +1,43 @@
 package com.hutech.hoithao.service;
+
 import com.hutech.hoithao.models.Event;
 import com.hutech.hoithao.models.Status_Event;
 import com.hutech.hoithao.repository.EventRepository;
 import com.hutech.hoithao.repository.Status_EventRepository;
 import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class EventService {
-    @Autowired
     private EventRepository eventRepository;
-    @Autowired
     private Status_EventRepository status_eventRepository;
+
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
     }
+
     public List<Event> getEventsByStatus(Status_Event status) {
         return eventRepository.findByStatus(status);
     }
-    public  Optional<Event> findById(Integer id) {
+
+    public Optional<Event> findById(Integer id) {
         return this.eventRepository.findById(id);
     }
+
     //add event
     public Event addEvent(Event event) {
         return eventRepository.save(event);
     }
+
     //update event
     public void updateEvent(@NotNull Event event) {
         Event existingEvent = eventRepository.findById(event.getId())
@@ -38,6 +48,7 @@ public class EventService {
         existingEvent.setStatus(event.getStatus());
         eventRepository.save(existingEvent);
     }
+
     //delete event
     public void deleteEvent(@NotNull Event event) {
         Event existingEvent = eventRepository.findById(event.getId())
@@ -48,6 +59,7 @@ public class EventService {
         existingEvent.setStatus(deletedStatus);
         eventRepository.save(existingEvent);
     }
+
     //search
     public List<Event> searchEventsByKeyword(String keyword) {
         return eventRepository.findByEventNameContainingIgnoreCase(keyword);

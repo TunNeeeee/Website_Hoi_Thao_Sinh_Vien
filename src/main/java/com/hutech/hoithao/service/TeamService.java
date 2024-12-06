@@ -67,5 +67,13 @@ public class TeamService {
                         .thenComparingInt(Team::getHs).reversed())
                 .collect(Collectors.toList());
     }
-
+    public List<Team> findBySportAndNoRankAndStatus(Integer sportId, int noRank, int status) {
+        return teamRepository.findBySportAndNoRankAndStatus(sportId, noRank, status);
+    }
+    public List<Team> findBySportAndNoRankAndStatusOrdered(Integer sportId, Integer noRank, Integer status) {
+        return teamRepository.findBySportIdAndNoRankAndStatusOrdered(sportId, noRank, status);
+    }
+    public List<Team> findBySportAndNoRankOrdered(Integer sportId, Integer noRank) {
+        return teamRepository.findBySportIdAndNoRankOrdered(sportId, noRank);
+    }
 }
