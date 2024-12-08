@@ -1,8 +1,13 @@
 package com.hutech.hoithao.service;
 
+import com.hutech.hoithao.models.Match;
+import com.hutech.hoithao.models.Round;
 import com.hutech.hoithao.models.Team;
+import com.hutech.hoithao.repository.MatchRepository;
 import com.hutech.hoithao.repository.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -13,7 +18,8 @@ import java.util.stream.Collectors;
 public class TeamService {
     @Autowired
     private TeamRepository teamRepository;
-
+    @Autowired
+    private MatchRepository matchRepository;
     // Lưu team vào cơ sở dữ liệu
     public void saveTeam(Team team) {
         teamRepository.save(team);
@@ -75,5 +81,23 @@ public class TeamService {
     }
     public List<Team> findBySportAndNoRankOrdered(Integer sportId, Integer noRank) {
         return teamRepository.findBySportIdAndNoRankOrdered(sportId, noRank);
+    }
+    public List<String> getLastThreeResults(Integer teamId) {
+        Pageable pageable = PageRequest.of(0, 3); // Giới hạn 3 trận
+        Round round = new Round();
+        round.setId(1);
+        List<Match> matches = matchRepository.findLastThreeMatchesByTeamIdAndRound(teamId, round, pageable);
+
+        return matches.stream()
+                .map(match -> {
+                    if (match.getTeam1().getId().equals(teamId)) {
+                        return match.getPoint1() > match.getPoint2() ? "W" :
+                                match.getPoint1().equals(match.getPoint2()) ? "D" : "L";
+                    } else {
+                        return match.getPoint2() > match.getPoint1() ? "W" :
+                                match.getPoint2().equals(match.getPoint1()) ? "D" : "L";
+                    }
+                })
+                .collect(Collectors.toList());
     }
 }

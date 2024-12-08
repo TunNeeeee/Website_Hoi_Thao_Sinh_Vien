@@ -72,8 +72,12 @@
                                 </tr>
                                 </tbody>
                             </table>
-                            <form th:action="@{/admin/{idSport}/groups(idSport=${sport.id})}"  th:if="${(sport.format.id == 1 or sport.format.id == 3) and sport.status == 0}">
+                            <form th:action="@{/admin/{idSport}/groups(idSport=${sport.id})}" th:if="${sport.format.id == 1 or sport.format.id == 3}" style="display: inline;">
                                 <button type="submit" class="btn btn-primary">Quản Lý Bảng Đấu</button>
+                            </form>
+
+                            <form th:action="@{/admin/{idSport}/playoff-tt(idSport=${sport.id})}" th:if="${sport.format.id == 2}" style="display: inline;">
+                                <button type="submit" class="btn btn-primary">Quản Lý Playoff</button>
                             </form>
                         </div>
                     </div>
@@ -112,7 +116,7 @@
                 <div class="col-md-3">
                     <div class="box">
                         <div class="box-header with-border">
-                            <h3 class="box-title">Đội bị loại <small>(Tổng: <span th:text="${#lists.size(eliminatedTeams)}">0</span>)</small></h3>
+                            <h3 class="box-title">Đội hoàn thành giải đấu <small>(Tổng: <span th:text="${#lists.size(eliminatedTeams)}">0</span>)</small></h3>
                         </div>
                         <div class="box-body">
                             <table class="table table-bordered">

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tạo Vòng Đầu Tiên</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="content-wrapper">
+  <!-- Header -->
+  <section class="content-header text-center">
+    <h1 class="mt-4">Tạo Vòng Đầu Tiên</h1>
+    <h3 class="text-muted"
+        th:text="'Vòng đầu tiên: ' + ${sport.numberTeamMax} + ' đội (' + ${roundName} + ')'">
+    </h3>
+    <hr>
+  </section>
+
+  <!-- Main Content -->
+  <section class="content">
+    <div class="container">
+      <!-- Hiển thị lỗi nếu có -->
+      <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+        <p th:text="${errorMessage}"></p>
+      </div>
+
+      <!-- Form tạo vòng đấu -->
+      <form th:action="@{/admin/{idSport}/playoff/create-first-round(idSport=${sport.id})}" method="post">
+        <div class="card">
+          <div class="card-header bg-primary text-white text-center">
+            <h4>Chọn Đội Cho Các Trận Đấu</h4>
+          </div>
+          <div class="card-body">
+            <!-- Lặp qua các cặp đội -->
+            <div th:each="index : ${#numbers.sequence(0, sport.numberTeamMax / 2 - 1)}">
+              <div class="row mb-3 align-items-center">
+                <!-- Đội 1 -->
+                <div class="col-md-5">
+                  <label for="team1-select-[[${index}]]" class="font-weight-bold">Đội 1</label>
+                  <select name="team1Ids" class="form-control team-select"
+                          id="team1-select-[[${index}]]" required>
+                    <option value="" disabled selected>Chọn đội 1</option>
+                    <option th:each="team : ${teams}"
+                            th:value="${team.id}"
+                            th:text="${team.teamName}">
+                    </option>
+                  </select>
+                </div>
+                <!-- VS -->
+                <div class="col-md-2 text-center">
+                  <strong>VS</strong>
+                </div>
+                <!-- Đội 2 -->
+                <div class="col-md-5">
+                  <label for="team2-select-[[${index}]]" class="font-weight-bold">Đội 2</label>
+                  <select name="team2Ids" class="form-control team-select"
+                          id="team2-select-[[${index}]]" required>
+                    <option value="" disabled selected>Chọn đội 2</option>
+                    <option th:each="team : ${teams}"
+                            th:value="${team.id}"
+                            th:text="${team.teamName}">
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <hr>
+            </div>
+          </div>
+          <div class="card-footer text-center">
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="fas fa-save"></i> Tạo Vòng Đấu
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>
+
+<!-- Footer -->
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const selects = document.querySelectorAll("select[name='team1Ids'], select[name='team2Ids']");
+
+    function updateOptions() {
+      // Lấy danh sách các giá trị đã chọn
+      const selectedValues = Array.from(selects)
+              .map(select => select.value)
+              .filter(value => value !== ""); // Loại bỏ các giá trị chưa chọn
+
+      // Cập nhật từng select
+      selects.forEach(select => {
+        Array.from(select.options).forEach(option => {
+          if (selectedValues.includes(option.value) && option.value !== select.value) {
+            option.disabled = true; // Vô hiệu hóa nếu đã chọn ở nơi khác
+          } else {
+            option.disabled = false; // Bật lại nếu chưa chọn
+          }
+        });
+      });
+    }
+
+    // Gắn sự kiện change cho tất cả các thẻ select
+    selects.forEach(select => {
+      select.addEventListener("change", updateOptions);
+    });
+
+    // Gọi cập nhật ban đầu để xử lý các giá trị mặc định (nếu có)
+    updateOptions();
+  });
+
+</script>
+</body>
+</html>
+

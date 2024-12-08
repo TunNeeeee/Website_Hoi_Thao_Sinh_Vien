@@ -4,17 +4,19 @@ import com.hutech.hoithao.domains.dtos.TeamDTO;
 import com.hutech.hoithao.models.*;
 import com.hutech.hoithao.repository.MatchRepository;
 import com.hutech.hoithao.repository.RoundRepository;
+import com.hutech.hoithao.repository.SportRepository;
 import com.hutech.hoithao.repository.TeamRepository;
 import com.hutech.hoithao.utils.mappers.MatchMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +27,7 @@ public class MatchService {
     TeamRepository teamRepository;
     RoundRepository roundRepository;
     MatchMapper matchMapper;
+    SportRepository sportRepository;
 
     public Match saveMatch(Match match) {
         return matchRepository.save(match);
@@ -85,5 +88,36 @@ public class MatchService {
     public Optional<Match> findMatch(Team team1, Team team2, Round round) {
         return matchRepository.findByTeam1AndTeam2AndRound(team1, team2, round);
     }
+//    public List<Match> getLastThreeMatchesByTeamInRound(Integer teamId, int round) {
+//        Pageable pageable = PageRequest.of(0, 3); // Lấy 3 trận đầu tiên
+//        return matchRepository.findLastThreeMatchesByTeamIdAndRound(teamId, pageable);
+//    }
+public void generateMatches(Integer sportId) {
+    Sport sport = sportRepository.findById(sportId)
+            .orElseThrow(() -> new IllegalArgumentException("Sport không tồn tại"));
+
+    List<Team> teams = teamRepository.findBySportId(sportId);
+    if (teams.size() < 2) {
+        throw new IllegalStateException("Cần ít nhất 2 đội để tạo trận đấu");
+    }
+
+    int rounds = (int) (Math.log(teams.size()) / Math.log(2));
+    Queue<Team> teamQueue = new LinkedList<>(teams);
+
+    List<Match> matches = new ArrayList<>();
+    for (int round = 1; round <= rounds; round++) {
+        int matchesInRound = (int) Math.pow(2, rounds - round);
+        for (int i = 0; i < matchesInRound; i++) {
+            Match match = new Match();
+            Round round1 = new Round();
+            round1.setId(round);
+            match.setRound(round1);
+            match.setTeam1(teamQueue.poll());
+            match.setTeam2(teamQueue.poll());
+            matches.add(match);
+        }
+    }
+    matchRepository.saveAll(matches);
+}
 }
 

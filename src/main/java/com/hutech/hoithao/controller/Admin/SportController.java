@@ -1,7 +1,9 @@
 package com.hutech.hoithao.controller.Admin;
 
-import com.hutech.hoithao.exceptions.ResourceNotFoundException;
 import com.hutech.hoithao.models.*;
+import com.hutech.hoithao.repository.MatchRepository;
+import com.hutech.hoithao.repository.SportRepository;
+import com.hutech.hoithao.repository.TeamRepository;
 import com.hutech.hoithao.service.*;
 import com.hutech.hoithao.utils.mappers.MatchMapper;
 import com.hutech.hoithao.utils.mappers.TeamMapper;
@@ -9,7 +11,6 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
@@ -35,6 +36,9 @@ public class SportController {
     private MatchService matchService;
     private PlayoffService playoffService;
     private RoundService roundService;
+    private MatchRepository matchRepository;
+    private TeamRepository teamRepository;
+    private SportRepository sportRepository;
     TeamMapper teamMapper;
     MatchMapper matchMapper;
 
@@ -193,6 +197,9 @@ public class SportController {
         sportService.update(sport);
         return "redirect:/admin/event";
     }
+    //--------------------------------------------------------------------------------------------//
+
+
     @GetMapping("/{idSport}/groups")
     public String viewGroups(@PathVariable Integer idSport, Model model) {
         Sport sport = sportService.getSportById(idSport);
@@ -204,19 +211,29 @@ public class SportController {
 
         List<Group> groups = groupService.getGroupsBySport(idSport);
         Map<Integer, List<Team>> sortedTeamsByGroup = new HashMap<>();
+        Map<Integer, List<String>> lastThreeResultsByTeam = new HashMap<>(); // Thêm map để lưu lastThreeResults
 
         for (Group group : groups) {
             List<Team> sortedTeams = teamService.getSortedTeamsByGroup(group.getId());
             sortedTeamsByGroup.put(group.getId(), sortedTeams);
+
+            // Tính lastThreeResults cho từng team trong group
+            for (Team team : sortedTeams) {
+                List<String> lastThreeResults = teamService.getLastThreeResults(team.getId()); // Giả sử 1 là round "vòng bảng"
+                lastThreeResultsByTeam.put(team.getId(), lastThreeResults);
+            }
         }
+
         model.addAttribute("teamsNotInGroup", teamService.getTeamsNotInAnyGroup(idSport));
         model.addAttribute("matches", matchService.findMatchesBySport(idSport)); // Lấy danh sách trận đấu
         model.addAttribute("sport", sport);
         model.addAttribute("groups", groups);
         model.addAttribute("sortedTeamsByGroup", sortedTeamsByGroup); // Gửi danh sách đã sắp xếp
+        model.addAttribute("lastThreeResultsByTeam", lastThreeResultsByTeam); // Gửi danh sách lastThreeResults
 
         return "admin/groups/list";
     }
+
 
 
     @PostMapping("/{idSport}/create-group")
@@ -275,6 +292,7 @@ public class SportController {
             // Format 1: Cập nhật thứ tự vào noFinal
             for (int i = 0; i < teams.size(); i++) {
                 teams.get(i).setNoFinal(i + 1);
+                teams.get(i).setStatus(0);
                 teamService.saveTeam(teams.get(i));
             }
         } else if (sport.getFormat().getId() == 3) {
@@ -537,11 +555,207 @@ public class SportController {
             default: return "Vòng " + teamsRemaining;  // Với số đội khác
         }
     }
+    //---------------------------------------------------------------------------------------------------------//
+    @GetMapping("/{idSport}/playoff-tt")
+    public String viewPlayoff(@PathVariable Integer idSport, Model model) {
+        List<Match> matches = matchRepository.findBySportId(idSport);
+        Sport sport = sportService.findById(idSport);
+        model.addAttribute("sport", sport);
+        model.addAttribute("matches", matches);
+        return "/admin/playoff/playoff-tt";
+    }
 
+    @PostMapping("/{idSport}/playoff-tt/generate")
+    public String generateMatches(@PathVariable Integer idSport) {
+        matchService.generateMatches(idSport);
+        return "redirect:/admin/{idSport}/playoff-tt";
+    }
+    @GetMapping("/{idSport}/playoff/create-first-round")
+    public String showCreateFirstRoundForm(@PathVariable("idSport") Integer idSport, Model model) {
+        Sport sport = sportRepository.findById(idSport)
+                .orElseThrow(() -> new IllegalArgumentException("Môn thể thao không tồn tại"));
+        String roundName;
+        switch (sport.getNumberTeamMax()) {
+            case 16:
+                roundName = "Vòng 1/16";
+                break;
+            case 8:
+                roundName = "Tứ kêt";
+                break;
+            case 4:
+                roundName = "Bán kết";
+                break;
+            case 2:
+                roundName="Chung kết";
+                break;
+            default:
+                throw new IllegalArgumentException("Số đội tối đa không hợp lệ.");
+        }
+        model.addAttribute("sport", sport);
+        model.addAttribute("numberTeamMax", sport.getNumberTeamMax());
+        model.addAttribute("roundName", roundName);
+        model.addAttribute("teams", teamRepository.findBySportId(idSport)); // Danh sách đội để chọn
+        return "/admin/playoff/create-first-round-tt";
+    }
+    @PostMapping("/{idSport}/playoff/create-first-round")
+    public String createFirstRound(
+            @PathVariable("idSport") Integer idSport,
+            @RequestParam List<Integer> team1Ids,
+            @RequestParam List<Integer> team2Ids,
+            Model model) {
+        // Lấy thông tin môn thể thao
+        Sport sport = sportRepository.findById(idSport)
+                .orElseThrow(() -> new IllegalArgumentException("Môn thể thao không tồn tại"));
+
+        // Kiểm tra số lượng đội có hợp lệ không
+        if (team1Ids.size() != team2Ids.size() || team1Ids.isEmpty()) {
+            model.addAttribute("errorMessage", "Số lượng đội không hợp lệ.");
+            return "redirect:/admin/" + idSport + "/playoff-tt";
+        }
+
+        // Xác định thông tin vòng đấu đầu tiên
+        int numberTeamMax = sport.getNumberTeamMax();
+        int roundNumber;
+        String roundName;
+        switch (numberTeamMax) {
+            case 16:
+                roundNumber = 2; // Mã định danh vòng
+                roundName = "Vòng 1/16";
+                break;
+            case 8:
+                roundNumber = 3;
+                roundName = "Tứ kết";
+                break;
+            case 4:
+                roundNumber = 4;
+                roundName = "Bán kết";
+                break;
+            case 2:
+                roundNumber = 5;
+                roundName = "Chung kết";
+                break;
+            default:
+                model.addAttribute("errorMessage", "Số đội tối đa không hợp lệ.");
+                return "redirect:/admin/" + idSport + "/playoff-tt";
+        }
+
+        // Kiểm tra trùng lặp đội trong cùng một vòng đấu
+        Set<Integer> selectedTeams = new HashSet<>();
+        List<Integer> allTeamIds = new ArrayList<>();
+        allTeamIds.addAll(team1Ids);
+        allTeamIds.addAll(team2Ids);
+
+        for (Integer teamId : allTeamIds) {
+            if (!selectedTeams.add(teamId)) {
+                model.addAttribute("errorMessage", "Một đội không được xuất hiện nhiều lần trong vòng đấu.");
+                return "redirect:/admin/" + idSport + "/playoff-tt";
+            }
+        }
+
+        // Tạo và lưu vòng đấu đầu tiên
+        Round firstRound = new Round();
+        firstRound.setId(roundNumber);
+
+        // Tạo danh sách trận đấu
+        List<Match> matches = new ArrayList<>();
+        for (int i = 0; i < team1Ids.size(); i++) {
+            int team1Id = team1Ids.get(i);
+            int team2Id = team2Ids.get(i);
+
+            // Lấy thông tin đội
+            Team team1 = teamRepository.findById(team1Id)
+                    .orElseThrow(() -> new IllegalArgumentException("Đội 1 không tồn tại với ID: " + team1Id));
+            Team team2 = teamRepository.findById(team2Id)
+                    .orElseThrow(() -> new IllegalArgumentException("Đội 2 không tồn tại với ID: " + team2Id));
+
+            // Tạo trận đấu
+            Match match = new Match();
+            match.setTeam1(team1);
+            match.setTeam2(team2);
+            match.setRound(firstRound);
+            matches.add(match);
+        }
+
+        // Lưu danh sách trận đấu
+        matchRepository.saveAll(matches);
+
+        // Chuyển hướng sau khi thành công
+        return "redirect:/admin/" + idSport + "/playoff-tt";
+    }
+
+
+
+    @PostMapping("/{idSport}/playoff/new-round")
+    public String createNewRound(@PathVariable("idSport") Integer idSport, Model model) {
+        // Lấy danh sách các trận đấu hiện tại cho môn thể thao
+        List<Match> currentMatches = matchRepository.findBySportId(idSport);
+
+        // Tìm các đội thắng từ vòng trước
+        List<Team> advancingTeams = new ArrayList<>();
+        for (Match match : currentMatches) {
+            if (match.getWinner() != null) {
+                if (match.getWinner() == 1) {
+                    advancingTeams.add(match.getTeam1());
+                } else {
+                    advancingTeams.add(match.getTeam2());
+                }
+            }
+        }
+
+        // Tạo vòng đấu mới nếu đủ đội
+        if (advancingTeams.size() < 2) {
+            throw new IllegalArgumentException("Không đủ đội để tạo vòng đấu mới.");
+        }
+
+        List<Match> newMatches = new ArrayList<>();
+        for (int i = 0; i < advancingTeams.size() / 2; i++) {
+            Match match = new Match();
+            match.setTeam1(advancingTeams.get(i * 2));
+            match.setTeam2(advancingTeams.get(i * 2 + 1));
+            Round round = new Round();
+            round.setId(currentMatches.get(0).getRound().getId()+ 1);
+            match.setRound(round); // Tăng số vòng
+            newMatches.add(match);
+        }
+
+        // Lưu các trận đấu mới
+        matchRepository.saveAll(newMatches);
+
+        return "redirect:/admin/" + idSport + "/playoff-tt";
+    }
+
+    @PostMapping("/{idSport}/playoff-tt/update")
+    public String updateMatch(@RequestParam Integer matchId,
+                              @RequestParam(required = false) Integer team1Id,
+                              @RequestParam(required = false) Integer team2Id,
+                              @RequestParam(required = false) Integer scoreTeam1,
+                              @RequestParam(required = false) Integer scoreTeam2) {
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new IllegalArgumentException("Match không tồn tại"));
+
+        // Lấy thông tin Team từ database nếu ID được cung cấp
+        if (team1Id != null) {
+            Team team1 = teamRepository.findById(team1Id)
+                    .orElseThrow(() -> new IllegalArgumentException("Team1 không tồn tại"));
+            match.setTeam1(team1);
+        }
+
+        if (team2Id != null) {
+            Team team2 = teamRepository.findById(team2Id)
+                    .orElseThrow(() -> new IllegalArgumentException("Team2 không tồn tại"));
+            match.setTeam2(team2);
+        }
+        if (scoreTeam1 != null) match.setPoint1(scoreTeam1);
+        if (scoreTeam2 != null) match.setPoint2(scoreTeam2);
+
+        matchRepository.save(match);
+        return "redirect:/admin/{idSport}/playoff-tt";
+    }
 
 
 
     //--------------------------------------------------------------------------------------------------------//
+    //Ranking vong tron tinh diem
     @GetMapping("/{idSport}/ranking")
     public String viewRanking(@PathVariable Integer idSport, Model model) {
         Sport sport = sportService.getSportById(idSport);
@@ -554,12 +768,56 @@ public class SportController {
         // Lọc các đội có status = 2 và sắp xếp theo noFinal
         List<Team> rankedTeams = teamService.getTeamsBySportSortedByRanking(idSport)
                 .stream()
-                .filter(team -> team.getStatus() == 2)
+                .filter(team -> team.getStatus() == 0)
                 .sorted(Comparator.comparingInt(Team::getNoFinal))
                 .toList();
         model.addAttribute("sport", sport);
         model.addAttribute("teams", rankedTeams); // Toàn bộ đội xếp hạng
         return "admin/rank/ranking"; // Trả về view "ranking.html"
+    }
+    //---------------------------------------------------------------------------------------------------------//
+    //Ranking vong bang + playoff
+    @GetMapping("/{idSport}/ranking-vbpo")
+    public String viewRankingVBPO(@PathVariable Integer idSport, Model model) {
+        Sport sport = sportService.getSportById(idSport);
+
+        // Lọc các đội có status = 2 và sắp xếp theo noFinal
+        List<Team> rankedTeams = teamService.getTeamsBySportSortedByRanking(idSport)
+                .stream()
+                .filter(team -> team.getStatus() == 0)
+                .sorted(Comparator.comparingInt(Team::getNoFinal))
+                .toList();
+
+        // Xác định đội vô địch, á quân và hạng 3 dựa trên noFinal
+        Team champion = rankedTeams.stream()
+                .filter(team -> team.getNoFinal() == 1)
+                .findFirst()
+                .orElse(null);
+
+        Team runnerUp = rankedTeams.stream()
+                .filter(team -> team.getNoFinal() == 2)
+                .findFirst()
+                .orElse(null);
+
+        Team thirdPlace = rankedTeams.stream()
+                .filter(team -> team.getNoFinal() == 4)
+                .findFirst()
+                .orElse(null);
+
+        Team thirdPlaceExtra = rankedTeams.stream()
+                .filter(team -> team.getNoFinal() == 4 && !team.equals(thirdPlace))
+                .findFirst()
+                .orElse(null);
+
+        model.addAttribute("thirdPlaceExtra", thirdPlaceExtra);
+        // Gán dữ liệu vào model
+        model.addAttribute("sport", sport);
+        model.addAttribute("teams", rankedTeams); // Toàn bộ đội đã lọc
+        model.addAttribute("champion", champion); // Vô địch
+        model.addAttribute("runnerUp", runnerUp); // Á quân
+        model.addAttribute("thirdPlace", thirdPlace); // Hạng 3
+
+        return "admin/playoff/ranking"; // Trả về view "ranking.html"
     }
 
 }

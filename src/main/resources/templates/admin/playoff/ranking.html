@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Bảng Xếp Hạng Tổng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Định dạng chung cho các thẻ card */
+        .ranking-card {
+            background: linear-gradient(145deg, #f8f8f8, #ffffff);
+            border-radius: 12px;
+            box-shadow: 3px 3px 6px #ccc, -3px -3px 6px #fff;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 280px;
+            margin: 15px;
+        }
+        .ranking-card:hover {
+            transform: scale(1.05);
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Cải tiến kiểu cho các huy chương */
+        .medal {
+            font-size: 50px;
+        }
+        .medal.gold { color: gold; }
+        .medal.silver { color: silver; }
+        .medal.bronze { color: #cd7f32; }
+
+        /* Làm nổi bật đội vô địch */
+        .highlight {
+            background: linear-gradient(145deg, #fff7e6, #fff4e1);
+            box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.15);
+            transform: scale(1.1);
+        }
+
+        /* Định dạng nút */
+        .btn-redirect {
+            background-color: #007bff;
+            color: white;
+            text-transform: uppercase;
+            padding: 8px 18px;
+            border-radius: 30px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .btn-redirect:hover {
+            background-color: #0056b3;
+        }
+
+        /* Flex container cho phần xếp hạng */
+        .ranking-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            padding: 50px 0;
+        }
+
+        .ranking-row {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+        }
+
+        .ranking-column {
+            display: flex;
+            justify-content: center;
+        }
+
+        .third-place-row {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+        }
+
+        /* Tạo không gian cho các đội */
+        .ranking-container {
+            margin-top: 40px;
+        }
+
+        h1 {
+            margin-bottom: 40px;
+        }
+
+        .third-place-row {
+            margin-top: 50px;
+        }
+
+        /* Cải thiện bảng xếp hạng */
+        table {
+            max-width: 900px;
+            margin: 0 auto;
+            margin-top: 40px;
+        }
+
+        th, td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <h1 class="text-center mb-4">🏆 Bảng Xếp Hạng Tổng 🏆</h1>
+
+    <!-- Khối chứa các đội Vô Địch, Á Quân, Hạng 3 -->
+    <div class="ranking-container">
+        <div class="ranking-row">
+            <!-- Vô Địch -->
+            <div class="ranking-card highlight">
+                <div class="medal gold">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <h2 class="text-uppercase text-primary" th:text="${champion.teamName}">Team Name</h2>
+                <h4>🥇 Vô Địch</h4>
+            </div>
+
+            <!-- Á Quân -->
+            <div class="ranking-card">
+                <div class="medal silver">
+                    <i class="fas fa-medal"></i>
+                </div>
+                <h2 class="text-uppercase text-secondary" th:text="${runnerUp.teamName}">Team Name</h2>
+                <h4>🥈 Á Quân</h4>
+            </div>
+        </div>
+
+        <!-- Hạng 3 -->
+        <div class="third-place-row">
+            <!-- Hạng 3 - 1 -->
+            <div class="ranking-column">
+                <div class="ranking-card">
+                    <div class="medal bronze">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h2 class="text-uppercase text-warning" th:text="${thirdPlace.teamName}">Team Name</h2>
+                    <h4>🥉 Hạng 3</h4>
+                </div>
+            </div>
+
+            <!-- Hạng 3 - 2 -->
+            <div class="ranking-column">
+                <div class="ranking-card">
+                    <div class="medal bronze">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h2 class="text-uppercase text-warning" th:text="${thirdPlaceExtra.teamName}">Team Name</h2>
+                    <h4>🥉 Hạng 3</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách đầy đủ -->
+    <div class="mt-5">
+        <h2 class="text-center">Danh sách các đội</h2>
+        <table class="table table-striped table-bordered mt-3">
+            <thead>
+            <tr>
+                <th>Thứ hạng</th>
+                <th>Tên đội</th>
+                <th>Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="team, iterStat : ${teams}">
+                <td th:text="${iterStat.index + 1}"></td>
+                <td th:text="${team.teamName}"></td>
+                <td>
+                    <a th:href="@{/admin/{idSport}/match/{teamId}(idSport=${sport.id}, teamId=${team.id})}"
+                       class="btn-redirect">
+                        Chi tiết
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-center mt-4">
+        <a th:href="@{/admin/{idSport}/playoff(idSport=${sport.id})}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
