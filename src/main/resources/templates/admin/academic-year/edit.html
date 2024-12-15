@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Chỉnh sửa niên khóa</title>
+</head>
+<body>
+<h1>Chỉnh sửa niên khóa</h1>
+<form th:action="@{/admin/edit-academic-year/{id}(id=${academicYear.id})}" th:object="${academicYear}" method="post">
+    <label>Tên Niên Khóa:</label>
+    <input type="text" th:field="*{nameAcademicYear}" required><br>
+
+    <label>Sự Kiện:</label>
+    <select th:field="*{event.id}" required>
+        <option th:each="event : ${events}" th:value="${event.id}" th:text="${event.eventName}"></option>
+    </select><br>
+
+    <button type="submit">Cập nhật</button>
+</form>
+</body>
+</html>

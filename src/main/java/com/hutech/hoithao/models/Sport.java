@@ -67,12 +67,12 @@ public class Sport {
     @Min(value = -1, message = "Trạng thái phải là -1, 0 hoặc 1.")
     @Max(value = 1, message = "Trạng thái phải là -1, 0 hoặc 1.")
     private Integer status;
-
+    @Column(name = "hien_thi")
+    private String hienThi;
     // Quan hệ với sự kiện
     @ManyToOne
-    @JoinColumn(name = "id_event", nullable = false)
-    @NotNull(message = "Hội thao không được để trống.")
-    private Event event;
+    @JoinColumn(name = "id_academicyear")
+    private AcademicYear academicYear;
 
     // Danh sách đội
     @OneToMany(mappedBy = "sport")

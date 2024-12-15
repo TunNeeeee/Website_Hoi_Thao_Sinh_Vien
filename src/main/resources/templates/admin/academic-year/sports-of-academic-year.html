@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments/head::head">
+    <!-- Thêm link tới Bootstrap và Font Awesome cho các biểu tượng -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background-color: #f4f7fa;
+            font-family: 'Roboto', sans-serif;
+        }
+        .content-header {
+            padding: 20px;
+            background-color: #17a2b8;
+            color: #fff;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .table thead {
+            background-color: #007bff;
+            color: white;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .btn-custom {
+            background-color: #28a745;
+            color: white;
+            border: none;
+        }
+        .btn-custom:hover {
+            background-color: #218838;
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        .btn-primary:hover {
+            background-color: #0069d9;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .breadcrumb {
+            background-color: #f1f1f1;
+            border-radius: 5px;
+        }
+        .breadcrumb a {
+            color: #007bff;
+        }
+        .breadcrumb .active {
+            color: #6c757d;
+        }
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge.bg-red {
+            background-color: #dc3545;
+        }
+        .text-muted {
+            color: #6c757d !important;
+        }
+        .text-primary {
+            color: #007bff !important;
+        }
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+
+<div class="wrapper">
+
+    <!-- Header -->
+    <header th:replace="admin/fragments/header::header"></header>
+
+    <!-- Sidebar -->
+    <aside th:replace="admin/fragments/sidebar::sidebar"></aside>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+        <!-- Content Header -->
+        <section class="content-header">
+            <h1 class="text-uppercase">
+                Hội Thao Khoa Công Nghệ Thông Tin
+            </h1>
+            <ol class="breadcrumb justify-content-center">
+                <li><a href="#"><i class="fa fa-home"></i> Home</a></li>
+                <li><a href="#">Examples</a></li>
+                <li class="active">Hội Thao</li>
+            </ol>
+        </section>
+
+        <!-- Main Content -->
+        <section class="content">
+            <div class="content-header text-center">
+                <h2 class="card-title">
+                    <span th:text="${academicYear.event.eventName}"></span>
+                </h2>
+                <p>Niên khóa: <span th:text="${academicYear.nameAcademicYear}" class="text-primary"></span></p>
+            </div>
+
+            <!-- Sports Table -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên Môn Thể Thao</th>
+                        <th>Thể Thức Thi Đấu</th>
+                        <th>Số Đội Tối Đa</th>
+                        <th>Ngày Bắt Đầu</th> <!-- Cột mới -->
+                        <th>Ngày Kết Thúc</th> <!-- Cột mới -->
+                        <th>Tiến Trình</th>
+                        <th>Hành Động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="sport : ${sportsList}">
+                        <td th:text="${sport.id}"></td>
+                        <td th:text="${sport.sportName}"></td>
+                        <td th:text="${sport.format.formatName}"></td>
+                        <td th:text="${sport.numberTeamMax}"></td>
+                        <td th:text="${#temporals.format(sport.startDate, 'dd/MM/yyyy')}"></td> <!-- Ngày bắt đầu -->
+                        <td th:text="${#temporals.format(sport.endDate, 'dd/MM/yyyy')}"></td>   <!-- Ngày kết thúc -->
+                        <td>
+                            <span class="badge bg-red" th:attr="data-startDate=${sport.startDate},data-endDate=${sport.endDate}">0%</span>
+                        </td>
+                        <td th:text="${sport.status == -1 ? 'Đã xóa' : (sport.status == 0 ? 'Đóng đăng ký' : 'Mở đăng ký')}"></td>
+                        <td>
+                            <a th:href="@{/admin/sports/edit/{id}(id=${sport.id})}" class="btn btn-warning btn-sm">
+                                Sửa
+                            </a>
+                            <a th:href="@{/admin/team-list/{sportId}(sportId=${sport.id})}" class="btn btn-primary btn-sm">
+                               Xem danh sách team
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${sportsList.isEmpty()}">
+                        <td colspan="8" class="text-center text-muted">Không có môn thể thao nào trong niên khóa này.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Buttons -->
+            <div class="mt-3 text-center">
+                <a th:href="@{/admin/event}" class="btn btn-secondary">Quay lại</a>
+                <a th:href="@{/admin/sport-add/{academicYearId}(academicYearId=${academicYear.id})}" class="btn btn-custom">
+                    Thêm Môn Thể Thao
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer th:replace="admin/fragments/footer::footer"></footer>
+
+</div>
+
+<!-- Scripts -->
+<div th:replace="admin/fragments/script::script"></div>
+</body>
+</html>

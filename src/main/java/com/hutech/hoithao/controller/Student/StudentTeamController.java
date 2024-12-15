@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,23 +35,26 @@ public class StudentTeamController {
 
     @Autowired
     private UserService userService;
+
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private SportService sportService;
+
     @Autowired
     private MemberService memberService;
 
+    // Đường dẫn thư mục lưu trữ ảnh
+    private final String UPLOAD_DIR = "src/main/resources/static/uploads/payment-proofs";
+
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
-        // Thêm một danh sách các môn thể thao vào model để hiển thị trong form
+        // Lấy danh sách các môn thể thao đang hoạt động
         List<Sport> activeSports = sportService.getActiveSports();
-        model.addAttribute("sports", activeSports); // Thêm danh sách các môn thể thao vào model
+        model.addAttribute("sports", activeSports);
 
-
-        // Trả về tên của view (tệp HTML) để hiển thị form đăng ký
-        return "student/registration"; // Đây là tên của tệp HTML (ví dụ: register_team.html)
+        return "student/registration";
     }
 
     @PostMapping("/register")
@@ -60,7 +66,7 @@ public class StudentTeamController {
             @RequestParam("paymentProof") MultipartFile paymentProofFile,
             @RequestParam List<String> mssvMembers) {
 
-        // Tìm kiếm User và Sport từ database
+        // Tìm User và Sport
         User currentUser = userRepository.findByUsername(user.getUsername());
         Sport sport = sportService.findById(sportId);
 
@@ -68,18 +74,25 @@ public class StudentTeamController {
             return ResponseEntity.badRequest().body("User hoặc Sport không hợp lệ");
         }
 
+        // Kiểm tra số lượng tên thành viên và MSSV
+        if (memberNames.size() != mssvMembers.size()) {
+            return ResponseEntity.badRequest().body("Số lượng tên thành viên và MSSV không khớp");
+        }
+
         // Kiểm tra kích thước file ảnh
         long maxFileSize = 5 * 1024 * 1024; // 5 MB
         if (paymentProofFile.getSize() > maxFileSize) {
-            return ResponseEntity.badRequest().body("File ảnh minh chứng quá lớn. Vui lòng chọn ảnh nhỏ hơn " + (maxFileSize / (1024 * 1024)) + " MB.");
+            return ResponseEntity.badRequest().body("File ảnh minh chứng quá lớn. Vui lòng chọn ảnh nhỏ hơn 5 MB.");
         }
 
-        // Chuyển đổi file ảnh sang mảng byte
-        byte[] paymentProof = null;
+        // Lưu file ảnh vào thư mục
+        String fileName = System.currentTimeMillis() + "-" + paymentProofFile.getOriginalFilename();
+        Path filePath = Paths.get(UPLOAD_DIR, fileName);
         try {
-            paymentProof = paymentProofFile.getBytes();  // Chuyển đổi MultipartFile thành mảng byte
+            Files.createDirectories(filePath.getParent()); // Tạo thư mục nếu chưa tồn tại
+            Files.write(filePath, paymentProofFile.getBytes()); // Lưu file ảnh
         } catch (IOException e) {
-            return ResponseEntity.badRequest().body("Lỗi khi xử lý ảnh minh chứng");
+            return ResponseEntity.badRequest().body("Lỗi khi lưu ảnh minh chứng: " + e.getMessage());
         }
 
         // Tạo đối tượng Team
@@ -89,7 +102,7 @@ public class StudentTeamController {
                 .user(currentUser)
                 .status(1)
                 .noFinal(sport.getNumberTeamMax())
-                .paymentProof(paymentProof)  // Lưu ảnh dưới dạng byte[]
+                .paymentProofPath("/uploads/payment-proofs/" + fileName) // Đường dẫn tương đối
                 .build();
 
         // Lưu Team vào database
@@ -98,23 +111,18 @@ public class StudentTeamController {
         // Lưu danh sách thành viên
         Set<Member> members = new HashSet<>();
         for (int i = 0; i < memberNames.size(); i++) {
-            String memberName = memberNames.get(i);
-            String mssvMember = mssvMembers.get(i);
-
             Member member = new Member();
-            member.setNameMember(memberName);
-            member.setMssv(mssvMember);
-            member.setTeam(team);  // Gán team cho member
+            member.setNameMember(memberNames.get(i));
+            member.setMssv(mssvMembers.get(i));
+            member.setTeam(team);
             members.add(member);
         }
-
-        // Lưu tất cả thành viên cùng một lúc
-        memberService.saveAllMembers(members);  // Giả sử bạn có phương thức này trong MemberService
+        memberService.saveAllMembers(members); // Lưu tất cả thành viên
 
         // Gán danh sách thành viên cho team và cập nhật lại
         team.setListMember(members);
-        teamService.saveTeam(team);  // Cập nhật lại team với danh sách thành viên
+        teamService.saveTeam(team);
 
-        return ResponseEntity.ok("Đăng ký thành công!");  // Trả về phản hồi thành công
+        return ResponseEntity.ok("Đăng ký thành công!");
     }
 }

@@ -33,5 +33,5 @@ public class Event {
     @JoinColumn(name = "id_status")
     private Status_Event status;
     @OneToMany(mappedBy = "event")
-    private Set<Sport> listSport;
+    private Set<AcademicYear> listAcademicYear;
 }

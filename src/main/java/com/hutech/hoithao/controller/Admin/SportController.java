@@ -39,6 +39,7 @@ public class SportController {
     private MatchRepository matchRepository;
     private TeamRepository teamRepository;
     private SportRepository sportRepository;
+    private AcademicYearService academicYearService;
     TeamMapper teamMapper;
     MatchMapper matchMapper;
 
@@ -68,39 +69,42 @@ public class SportController {
         model.addAttribute("formats",formats);
         return "admin/sport/add";
     }
-    @GetMapping("/sport-add")
-    public String add(Model model) {
+    @GetMapping("/sport-add/{academicYearId}")
+    public String add(@PathVariable("academicYearId") Integer academicYearId, Model model) {
         Status_Event status = new Status_Event();
         status.setId(1);
         List<Event> events = eventService.getEventsByStatus(status);
         List<Format> formats = formatService.findAll();
         Sport sport = new Sport();
+        AcademicYear academicYear = academicYearService.findById(academicYearId);
+        // Gửi đối tượng academicYear vào model
+        model.addAttribute("academicYear", academicYear);
         model.addAttribute("sport", sport);
         model.addAttribute("events", events);
         model.addAttribute("formats",formats);
         return "admin/sport/add";
     }
 
-    @PostMapping("/sport-add")
-    public String save(@ModelAttribute("sport") Sport sport, BindingResult bindingResult, Model model) {
+
+    @PostMapping("/sport-add/{academicYearId}")
+    public String save(@ModelAttribute("sport") Sport sport,@PathVariable Integer academicYearId, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            Status_Event status = new Status_Event();
-            status.setId(3);
-            List<Event> events = eventService.getEventsByStatus(status);
-            model.addAttribute("events", events);
             return "admin/sport/add";
         }
+        // Lấy AcademicYear từ ID trong form
+        AcademicYear academicYear = academicYearService.findById(academicYearId);
+        sport.setAcademicYear(academicYear);
+
+        // Lưu môn thể thao
         if (sportService.create(sport)) {
             return "redirect:/admin/sport";
         } else {
-            model.addAttribute("errorMessage", "Could not save sport");
-            Status_Event status = new Status_Event();
-            status.setId(0);
-            List<Event> events = eventService.getEventsByStatus(status);
-            model.addAttribute("events", events);
+            model.addAttribute("errorMessage", "Không thể lưu môn thể thao.");
             return "admin/sport/add";
         }
     }
+
+
 
     @GetMapping("/edit-sport/{id}")
     public String editSport(@PathVariable("id") Integer id, Model model) {
@@ -112,12 +116,10 @@ public class SportController {
         }
 
         // Lấy danh sách events và formats để hiển thị
-        List<Event> events = eventService.getAllEvents();
         List<Format> formats = formatService.findAll();
 
         // Đưa các giá trị vào model để hiển thị trên giao diện
         model.addAttribute("sport", sport);
-        model.addAttribute("events", events);
         model.addAttribute("formats", formats);
 
         return "admin/sport/edit"; // Hiển thị trang chỉnh sửa
@@ -179,12 +181,16 @@ public class SportController {
         List<Team> pendingTeams = teamService.findTeamsByStatus(sportId, List.of(1));      // Chưa duyệt
         List<Team> rejectedTeams = teamService.findTeamsByStatus(sportId, List.of(-1));
         List<Team> eliminatedTeams = teamService.findTeamsByStatus(sportId, List.of(0));
+        List<Team> allTeams = new ArrayList<>();
+        allTeams.addAll(approvedTeams);
+        allTeams.addAll(eliminatedTeams);
         Sport sport = sportService.findById(sportId);
         model.addAttribute("sport", sport);
         model.addAttribute("eliminatedTeams", eliminatedTeams);
         model.addAttribute("approvedTeams", approvedTeams);
         model.addAttribute("pendingTeams", pendingTeams);
         model.addAttribute("rejectedTeams", rejectedTeams);
+        model.addAttribute("allTeams", allTeams);
         return "admin/team/team-list"; // Tên file Thymeleaf hiển thị danh sách team
     }
 

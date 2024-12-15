@@ -1,95 +1,140 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head  th:replace="admin/fragments/head::head"></head>
+<head th:replace="admin/fragments/head::head">
+    <!-- Thêm các đường dẫn tới CSS Bootstrap và tùy chỉnh cho đẹp mắt -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        .box-header {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .box-footer {
+            background-color: #f1f1f1;
+            border-top: 1px solid #ddd;
+        }
+        .box-body {
+            background-color: #f8f9fa;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .btn-btn-successs {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+        .breadcrumb {
+            background-color: #f1f1f1;
+        }
+        .breadcrumb a {
+            color: #007bff;
+        }
+        .breadcrumb .active {
+            color: #6c757d;
+        }
+    </style>
+</head>
 <body class="hold-transition skin-blue sidebar-mini">
 <!-- Site wrapper -->
 <div class="wrapper">
 
     <header th:replace="admin/fragments/header::header"></header>
 
-    <!-- =============================================== -->
+    <!-- Sidebar -->
     <header th:replace="admin/fragments/sidebar::sidebar"></header>
-    <!-- Left side column. contains the sidebar -->
 
-
-    <!-- =============================================== -->
-
-    <!-- Content Wrapper. Contains page content -->
+    <!-- Content Wrapper -->
     <div class="content-wrapper">
-        <!-- Content Header (Page header) -->
+        <!-- Content Header -->
         <section class="content-header">
-
+            <h1 class="text-center text-primary">
+                Cập Nhật Hội Thao
+            </h1>
             <ol class="breadcrumb">
-                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+                <li><a href="#"><i class="fa fa-home"></i> Home</a></li>
                 <li><a href="#">Event</a></li>
-                <li class="active">AddEvent</li>
+                <li class="active">Cập Nhật</li>
             </ol>
         </section>
 
         <!-- Main content -->
         <section class="content">
-            <!-- Default box -->
-            <div class="col-md-9">
+            <div class="col-md-9 offset-md-1">
 
+                <!-- Box Form -->
                 <div class="box box-primary">
                     <div class="box-header with-border">
-                        <h3 class="box-title">Danh Sách Các môn thể thao </h3>
-                        <div> <a class="btn-btn-successs"> Thêm Mới Môn Thể Thao </a></div>
+                        <h3 class="box-title">Cập Nhật Thông Tin Hội Thao</h3>
                     </div>
+
+                    <!-- Form Edit Event -->
                     <form role="form" method="post" th:action="@{/admin/edit-event/{id}(id=${event.id})}" th:object="${event}">
                         <input type="hidden" class="form-control" th:field="*{id}">
+
+                        <!-- Tên Hội Thao -->
                         <div class="box-body">
                             <div class="form-group">
-                                <label for="eventName">Tên Hội Thao </label>
-                                <input type="text" class="form-control" id="eventName"  th:field="*{eventName}" required>
+                                <label for="eventName">Tên Hội Thao</label>
+                                <input type="text" class="form-control" id="eventName" th:field="*{eventName}" required placeholder="Nhập tên hội thao">
                             </div>
-                            </div>
+
+                            <!-- Ngày Bắt Đầu -->
                             <div class="form-group">
                                 <label for="startDate">Ngày Bắt Đầu</label>
-                                <input type="date" class="form-control" id="startDate" th:field="*{startDate}">
+                                <input type="date" class="form-control" id="startDate" th:field="*{startDate}" placeholder="Chọn ngày bắt đầu">
                             </div>
+
+                            <!-- Ngày Kết Thúc -->
                             <div class="form-group">
                                 <label for="endDate">Ngày Kết Thúc</label>
-                                <input type="date" class="form-control" id="endDate" th:field="*{endDate}">
+                                <input type="date" class="form-control" id="endDate" th:field="*{endDate}" placeholder="Chọn ngày kết thúc">
                             </div>
 
-                        <div class="form-group">
-                            <label for="status">Trạng Thái</label>
-                            <select class="form-control" id="status" th:field="*{status}">
-                                <option value="">Chọn trạng thái</option>
-                                <option th:each="status : ${statuses}"
-                                        th:value="${status.id}"
-                                        th:text="${status.statusName}">
-                                </option>
-                            </select>
+                            <!-- Trạng Thái -->
+                            <div class="form-group">
+                                <label for="status">Trạng Thái</label>
+                                <select class="form-control" id="status" th:field="*{status}">
+                                    <option value="">Chọn trạng thái</option>
+                                    <option th:each="status : ${statuses}"
+                                            th:value="${status.id}"
+                                            th:text="${status.statusName}">
+                                    </option>
+                                </select>
+                            </div>
                         </div>
 
-
+                        <!-- Box Footer -->
                         <div class="box-footer">
-                                <button type="submit" class="btn btn-primary">Update</button>
-                            <a th:href="@{/admin/event}" class="btn btn-primary">Thoát</a>
-                            </div>
-
-
+                            <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Lưu</button>
+                            <a th:href="@{/admin/event}" class="btn btn-secondary"><i class="fa fa-arrow-left"></i> Quay lại</a>
+                        </div>
                     </form>
-
-
-
-
-
                 </div>
+                <!-- End Box Form -->
             </div>
         </section>
-        <!-- /.content -->
     </div>
-    <!-- /.content-wrapper -->
+    <!-- End Content Wrapper -->
 
+    <!-- Footer -->
     <footer th:replace="admin/fragments/footer::footer"></footer>
 </div>
 <!-- ./wrapper -->
 
-<!-- jQuery 3 -->
-
+<!-- jQuery & Bootstrap JS -->
 <div th:replace="admin/fragments/script::script"></div>
 </body>
 </html>

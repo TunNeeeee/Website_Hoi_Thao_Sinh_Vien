@@ -27,12 +27,12 @@ public class TeamController {
 
     @GetMapping("/image/{id}")
     @ResponseBody
-    public ResponseEntity<byte[]> getPaymentProof(@PathVariable Integer id) {
+    public ResponseEntity<String> getPaymentProofPath(@PathVariable Integer id) {
         Team team = teamService.findTeamById(id);
-        if (team != null && team.getPaymentProof() != null) {
+        if (team != null && team.getPaymentProofPath() != null) {
             return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG) // Hoặc định dạng hình ảnh tương ứng
-                    .body(team.getPaymentProof());
+                    .contentType(MediaType.IMAGE_JPEG) // Chỉ định định dạng file trả về
+                    .body(team.getPaymentProofPath());
         }
         return ResponseEntity.notFound().build();
     }
@@ -73,7 +73,7 @@ public class TeamController {
                 Integer idSport = sport.getId(); // Lấy idSport từ đối tượng Sport
 
                 // Kiểm tra số lượng đội đã duyệt cho môn thể thao này
-                long approvedTeamsCount = teamService.countApprovedTeamsBySport(idSport);
+                long approvedTeamsCount = teamService.countApprovedTeamsBySport(idSport) + teamService.countFinishTeamBySport(idSport);
 
                 // Nếu số lượng đội đã đạt giới hạn cho môn thể thao này
                 if (approvedTeamsCount >= sport.getNumberTeamMax()) {

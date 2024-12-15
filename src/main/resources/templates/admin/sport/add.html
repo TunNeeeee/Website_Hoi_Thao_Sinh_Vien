@@ -1,164 +1,200 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="admin/fragments/head::head"></head>
-<body class="hold-transition skin-blue sidebar-mini">
-<!-- Site wrapper -->
-<div class="wrapper">
-
-    <header th:replace="admin/fragments/header::header"></header>
+<head th:replace="admin/fragments/head::head">
+    <title>Thêm mới môn thể thao</title>
     <style>
-        .is-invalid {
-            border: 2px solid red;
+        /* Cải thiện tổng quan giao diện */
+        .form-wrapper {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 800px;
+            margin: 30px auto;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #007bff;
+        }
+
+        .form-header small {
+            color: #6c757d;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #343a40;
+        }
+
+        .form-control {
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            padding: 10px;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
         }
 
         .error-message {
             color: red;
-            font-size: 0.875em;
+            font-size: 0.875rem;
             margin-top: 5px;
         }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .breadcrumb-item.active {
+            color: #6c757d;
+        }
     </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
 
-
-    <!-- =============================================== -->
+    <header th:replace="admin/fragments/header::header"></header>
     <header th:replace="admin/fragments/sidebar::sidebar"></header>
-    <!-- Left side column. contains the sidebar -->
 
-    <!-- =============================================== -->
-
-    <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
-        <!-- Content Header (Page header) -->
         <section class="content-header">
-            <h1>
-                Add Sport
-                <small>it all starts here</small>
-            </h1>
+            <h1>Thêm mới môn thể thao</h1>
             <ol class="breadcrumb">
-                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-                <li><a href="#">Examples</a></li>
-                <li class="active">Add Sport</li>
+                <li class="breadcrumb-item"><a href="#"><i class="fa fa-dashboard"></i> Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="#">Môn thể thao</a></li>
+                <li class="breadcrumb-item active">Thêm mới</li>
             </ol>
         </section>
 
-        <!-- Main content -->
         <section class="content">
-            <!-- Default box -->
-            <div class="col-md-9">
-                <div class="box box-primary">
-                    <form role="form" method="post" th:action="@{/admin/sport-add}" th:object="${sport}">
-                        <div class="box-body">
-                            <div class="form-group">
-                                <label>Hội Thao</label>
-                                <select class="form-control" th:field="*{event}">
-                                    <option th:each="event : ${events}" th:value="${event.id}" th:text="${event.eventName}"></option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Tên Môn Thể Thao</label>
-                                <input type="text" class="form-control" th:field="*{sportName}">
-                            </div>
-                            <div class="form-group">
-                                <label>The thuc</label>
-                                <select class="form-control" th:field="*{format}">
-                                    <option th:each="format : ${formats}" th:value="${format.id}" th:text="${format.formatName}"></option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Số Lượng Đội Tham Gia</label>
-                                <input type="number" class="form-control" th:field="*{numberTeamMax}">
-                            </div>
-                            <div class="form-group">
-                                <label>Phí Ký Quỹ</label>
-                                <input type="text" class="form-control" th:field="*{phiKyQuy}">
-                            </div>
-                            <div class="form-group">
-                                <label>Phí Tham Gia</label>
-                                <input type="number" class="form-control" th:field="*{phiThamGia}">
-                            </div>
-                            <div class="form-group">
-                                <label>Số Lượng Thành Viên</label>
-                                <input type="number" class="form-control" th:field="*{numberMember}">
-                            </div>
-                            <div class="form-group">
-                                <label for="startDate">Ngày Bắt Đầu</label>
-                                <input type="date" class="form-control" id="startDate" th:field="*{startDate}">
-                            </div>
-                            <div class="form-group">
-                                <label for="endDate">Ngày Kết Thúc</label>
-                                <input type="date" class="form-control" id="endDate" th:field="*{endDate}">
-                            </div>
-
-                            <div class="box-footer">
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                            </div>
-                        </div>
-                    </form>
+            <div class="form-wrapper">
+                <div class="form-header">
+                    <small>Vui lòng điền đầy đủ thông tin bên dưới</small>
                 </div>
+
+                <form role="form" method="post" th:action="@{/admin/sport-add/{academicYearId}(academicYearId=${academicYear.id})}" th:object="${sport}">
+                    <div class="form-group">
+                        <label for="sportName">Tên Môn Thể Thao</label>
+                        <input type="text" id="sportName" class="form-control" th:field="*{sportName}" required>
+                        <span class="error-message" th:if="${#fields.hasErrors('sportName')}" th:text="${#fields.errors('sportName')}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="format">Thể thức</label>
+                        <select id="format" class="form-control" th:field="*{format}" required>
+                            <option th:each="format : ${formats}" th:value="${format.id}" th:text="${format.formatName}"></option>
+                        </select>
+                        <span class="error-message" th:if="${#fields.hasErrors('format')}" th:text="${#fields.errors('format')}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="numberTeamMax">Số Lượng Đội Tham Gia</label>
+                        <input type="number" id="numberTeamMax" class="form-control" th:field="*{numberTeamMax}" required>
+                        <span class="error-message" th:if="${#fields.hasErrors('numberTeamMax')}" th:text="${#fields.errors('numberTeamMax')}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phiKyQuy">Phí Ký Quỹ</label>
+                        <input type="text" id="phiKyQuy" class="form-control" th:field="*{phiKyQuy}" required>
+                        <span class="error-message" th:if="${#fields.hasErrors('phiKyQuy')}" th:text="${#fields.errors('phiKyQuy')}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phiThamGia">Phí Tham Gia</label>
+                        <input type="number" id="phiThamGia" class="form-control" th:field="*{phiThamGia}" required>
+                        <span class="error-message" th:if="${#fields.hasErrors('phiThamGia')}" th:text="${#fields.errors('phiThamGia')}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="numberMember">Số Lượng Thành Viên</label>
+                        <input type="number" id="numberMember" class="form-control" th:field="*{numberMember}" required>
+                        <span class="error-message" th:if="${#fields.hasErrors('numberMember')}" th:text="${#fields.errors('numberMember')}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="startDate">Ngày Bắt Đầu</label>
+                        <input type="date" id="startDate" class="form-control" th:field="*{startDate}" required>
+                        <span class="error-message" th:if="${#fields.hasErrors('startDate')}" th:text="${#fields.errors('startDate')}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="endDate">Ngày Kết Thúc</label>
+                        <input type="date" id="endDate" class="form-control" th:field="*{endDate}" required>
+                        <span class="error-message" th:if="${#fields.hasErrors('endDate')}" th:text="${#fields.errors('endDate')}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hienThi">Thể thức hoặc Quy định</label>
+                        <textarea id="hienThi" class="form-control" th:field="*{hienThi}" rows="4" required></textarea>
+                        <span class="error-message" th:if="${#fields.hasErrors('hienThi')}" th:text="${#fields.errors('hienThi')}"></span>
+                    </div>
+
+                    <div class="form-footer">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
             </div>
         </section>
-        <!-- /.content -->
     </div>
-    <!-- /.content-wrapper -->
 
     <footer th:replace="admin/fragments/footer::footer"></footer>
 </div>
-<!-- ./wrapper -->
 
-<!-- jQuery 3 -->
-
-<div th:replace="admin/fragments/script::script"></div>
-</body>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const form = document.querySelector("form");
 
         form.addEventListener("submit", function (event) {
-            let isValid = true;
-
-            // Lấy tất cả các input có thẻ required
-            const requiredInputs = form.querySelectorAll("input[required], select[required]");
-
-            requiredInputs.forEach(input => {
-                const errorMessage = input.nextElementSibling;
-                if (!input.value.trim()) {
-                    input.classList.add("is-invalid"); // Thêm viền đỏ
-                    if (errorMessage) {
-                        errorMessage.textContent = "Trường này là bắt buộc.";
-                    }
-                    isValid = false;
-                } else {
-                    input.classList.remove("is-invalid"); // Xóa viền đỏ
-                    if (errorMessage) {
-                        errorMessage.textContent = ""; // Xóa thông báo lỗi
-                    }
-                }
-            });
-
-            // Kiểm tra ngày
             const startDate = new Date(document.getElementById("startDate").value);
             const endDate = new Date(document.getElementById("endDate").value);
             const today = new Date();
 
             if (startDate <= today) {
                 alert("Ngày bắt đầu phải là một ngày trong tương lai.");
-                isValid = false;
+                event.preventDefault();
             }
 
             if (endDate <= today) {
                 alert("Ngày kết thúc phải là một ngày trong tương lai.");
-                isValid = false;
+                event.preventDefault();
             }
-
             if (startDate >= endDate) {
                 alert("Ngày bắt đầu phải trước ngày kết thúc.");
-                isValid = false;
-            }
-
-            if (!isValid) {
-                event.preventDefault(); // Ngăn form được submit
+                event.preventDefault();
             }
         });
     });
 </script>
 
+</body>
 </html>

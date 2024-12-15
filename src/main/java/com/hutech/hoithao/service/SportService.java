@@ -33,7 +33,7 @@ public class SportService {
         return sportRepository.findById(idSport).orElse(null);
     }
     public List<Sport> getSportsByEvent(Integer id) {
-        return sportRepository.findByEventId(id);
+        return sportRepository.findByAcademicYear_Id(id);
     }
     public Sport getSportById(Integer id) {
         return sportRepository.findById(id).orElse(null);

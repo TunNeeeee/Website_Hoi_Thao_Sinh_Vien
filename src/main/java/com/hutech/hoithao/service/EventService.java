@@ -32,6 +32,11 @@ public class EventService {
     public Optional<Event> findById(Integer id) {
         return this.eventRepository.findById(id);
     }
+    public Event getEventById(Integer id) {
+        return eventRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sự kiện với ID: " + id));
+    }
+
 
     //add event
     public Event addEvent(Event event) {

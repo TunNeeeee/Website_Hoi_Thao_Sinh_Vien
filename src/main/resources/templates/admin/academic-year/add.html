@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments/head :: head"></head>
+<body class="hold-transition skin-blue sidebar-mini">
+<!-- Site wrapper -->
+<div class="wrapper">
+
+    <!-- Header -->
+    <header th:replace="admin/fragments/header :: header"></header>
+
+    <!-- Sidebar -->
+    <aside th:replace="admin/fragments/sidebar :: sidebar"></aside>
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Thêm Niên Khóa Mới
+                <small>Cho Sự Kiện: <span th:text="${eventName}"></span></small>
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="/admin/event"><i class="fa fa-dashboard"></i> Sự Kiện</a></li>
+                <li class="active">Thêm Niên Khóa</li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <!-- Form box -->
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Thông Tin Niên Khóa</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <!-- form start -->
+                        <form th:action="@{/admin/add-academic-year-to-event}" th:object="${academicYear}" method="post">
+                            <div class="box-body">
+                                <!-- Trường ẩn để gửi id của Event -->
+                                <input type="hidden" th:field="*{event.id}" />
+
+                                <!-- Tên Niên Khóa -->
+                                <div class="form-group">
+                                    <label for="nameAcademicYear">Tên Niên Khóa:</label>
+                                    <input type="text" class="form-control" id="nameAcademicYear" th:field="*{nameAcademicYear}" placeholder="Ví dụ: 2024 - 2025" required />
+                                </div>
+
+
+
+                                <!-- Nếu có danh sách môn thể thao, bạn có thể thêm chúng ở đây -->
+
+                                <!-- Hiển thị thông báo lỗi nếu có -->
+                                <div th:if="${errorMessage}" class="alert alert-danger">
+                                    <p th:text="${errorMessage}"></p>
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+
+                            <div class="box-footer">
+                                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Thêm Niên Khóa</button>
+                                <a href="/admin/event" class="btn btn-default"><i class="fa fa-times-circle"></i> Hủy</a>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- /.box -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+    <!-- Footer -->
+    <footer th:replace="admin/fragments/footer :: footer"></footer>
+</div>
+<!-- ./wrapper -->
+
+<!-- Scripts -->
+<div th:replace="admin/fragments/script :: script"></div>
+
+</body>
+</html>

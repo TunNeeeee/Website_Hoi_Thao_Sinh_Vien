@@ -14,7 +14,7 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
             <h1>
-                Thông Tin Đội
+                <i class="fa fa-info-circle"></i> Thông Tin Đội
                 <small>Chi tiết thông tin đội đăng ký</small>
             </h1>
             <ol class="breadcrumb">
@@ -26,51 +26,72 @@
 
         <!-- Main content -->
         <section class="content">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Thông Tin Đội</h3>
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title"><i class="fa fa-users"></i> Thông Tin Chi Tiết Đội</h3>
                 </div>
+
                 <div class="card-body">
+                    <!-- Hiển thị thông báo lỗi nếu có -->
                     <div th:if="${param.error == 'maxApproved'}">
                         <div class="alert alert-danger" id="errorMessage">
-                            Số lượng đội đã đạt giới hạn cho môn thể thao <span th:text="${param.sport}"></span> này.
+                            <i class="fa fa-exclamation-circle"></i> Số lượng đội đã đạt giới hạn cho môn thể thao <span th:text="${param.sport}"></span> này.
                         </div>
                     </div>
-                    <a th:if="${team.sport.getNumberTeamMax() <= approvedTeamsCount}">
-                        Số lượng đội đã đạt giới hạn
-                    </a>
 
+                    <!-- Thông tin cơ bản của đội -->
+                    <div class="mb-4">
+                        <p><strong>ID:</strong> <span th:text="${team.id}"></span></p>
+                        <p><strong>Tên Đội:</strong> <span th:text="${team.teamName}"></span></p>
+                        <p><strong>Môn Thể Thao:</strong> <span th:text="${team.sport.sportName}"></span></p>
+                        <p><strong>Trạng Thái:</strong>
+                            <span th:if="${team.status == 0}" class="badge bg-danger">Hoàn thành</span>
+                            <span th:if="${team.status == 1}" class="badge bg-warning">Chờ duyệt</span>
+                            <span th:if="${team.status == 2}" class="badge bg-success">Đã duyệt</span>
+                            <span th:if="${team.status == -1}" class="badge bg-secondary">Không duyệt</span>
+                        </p>
+                        <p><strong>Người Đăng Ký:</strong> <span th:text="${team.user.full_name}"></span></p>
+                        <p><strong>Lớp:</strong> <span th:text="${team.user.className}"></span></p>
+                    </div>
 
-                    <p><strong>ID:</strong> <span th:text="${team.id}"></span></p>
-                    <p><strong>Tên Đội:</strong> <span th:text="${team.teamName}"></span></p>
-                    <p><strong>Môn Thể Thao:</strong> <span th:text="${team.sport.sportName}"></span></p>
-                    <p><strong>Trạng Thái:</strong>
-                        <span th:if="${team.status == 0}" th:text="'Bị Loại'" class="badge badge-danger"></span>
-                        <span th:if="${team.status == 1}" th:text="'Chờ duyệt'" class="badge badge-warning"></span>
-                        <span th:if="${team.status == 2}" th:text="'Đã duyệt'" class="badge badge-success"></span>
-                        <span th:if="${team.status == -1}" th:text="'Không duyệt'" class="badge badge-secondary"></span>
-                    </p>
-                    <p><strong>Người Đăng Ký:</strong> <span th:text="${team.user.full_name}"></span></p>
-                    <p><strong>Lớp:</strong> <span th:text="${team.user.className}"></span></p>
-                    <h3>Danh Sách Thành Viên</h3>
+                    <!-- Danh sách thành viên -->
+                    <h4><i class="fa fa-list"></i> Danh Sách Thành Viên</h4>
                     <ul class="list-group mb-4">
-                        <li th:each="member : ${members}" class="list-group-item">
-                            <span th:text="${member.mssv}">MSSV</span> - <span th:text="${member.nameMember}">Tên Thành Viên</span>
+                        <li th:each="member : ${members}" class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>
+                                <strong>MSSV:</strong> <span th:text="${member.mssv}"></span>
+                                - <strong>Tên:</strong> <span th:text="${member.nameMember}"></span>
+                            </span>
                         </li>
                     </ul>
 
-                    <h3>Hình Ảnh Minh Chứng Chuyển Khoản</h3>
-                    <img th:src="@{/admin/team/image/{id}(id=${team.id})}" alt="Payment Proof" class="img-fluid" style="max-width: 300px; height: auto; margin-bottom: 20px;"/>
+                    <!-- Hình ảnh minh chứng -->
+                    <h4><i class="fa fa-image"></i> Hình Ảnh Minh Chứng Chuyển Khoản</h4>
+                    <div class="text-center mb-4">
+                        <img th:src="@{${team.paymentProofPath}}" alt="Payment Proof" class="img-thumbnail"
+                             style="max-width: 300px; height: auto; margin-bottom: 20px;" />
 
-                    <div class="d-flex justify-content-between">
-                    <form th:action="@{/admin/team/approve/{id}(id=${team.id})}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-success">Duyệt</button>
-                    </form>
-                    <form th:action="@{/admin/team/reject/{id}(id=${team.id})}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-danger">Không Duyệt</button>
-                    </form>
                     </div>
-                    <a th:href="@{/admin/team}" class="btn btn-secondary">Quay Lại</a>
+
+                    <!-- Các nút hành động -->
+                    <div class="d-flex justify-content-between">
+                        <!-- Duyệt Button: Hiển thị nếu trạng thái là 'Chờ duyệt' (1) và nếu chưa đạt giới hạn đội -->
+                        <form th:if="${team.status == 1 and approvedTeamsCount < team.sport.getNumberTeamMax()}" th:action="@{/admin/team/approve/{id}(id=${team.id})}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Duyệt</button>
+                        </form>
+
+                        <!-- Không Duyệt Button: Hiển thị nếu trạng thái là 'Chờ duyệt' (1) hoặc 'Không duyệt' (-1) -->
+                        <form th:if="${team.status != 2 and team.status != 0}" th:action="@{/admin/team/reject/{id}(id=${team.id})}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger"><i class="fa fa-times"></i> Không Duyệt</button>
+                        </form>
+                    </div>
+
+                    <!-- Nút quay lại -->
+                    <div class="text-center mt-4">
+                        <a th:href="@{/admin/team}" class="btn btn-secondary">
+                            <i class="fa fa-arrow-left"></i> Quay Lại
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
@@ -84,6 +105,7 @@
 
 <!-- jQuery 3 -->
 <div th:replace="admin/fragments/script::script"></div>
+
 <script>
     // Kiểm tra nếu có thông báo lỗi
     if (document.getElementById("errorMessage")) {

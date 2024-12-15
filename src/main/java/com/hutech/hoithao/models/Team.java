@@ -26,9 +26,8 @@ public class Team {
     private String teamName;
 
     // Dùng để lưu hình ảnh minh chứng
-    @Lob
-    @Column(name = "payment_proof", columnDefinition = "BLOB", nullable = true)
-    private byte[] paymentProof;
+    @Column(name = "payment_proof_path", length = 500, nullable = true)
+    private String paymentProofPath;
 
     // Trạng thái của team/tuyển thủ
     // -1: Không duyệt đơn, 0: Đang duyệt đơn, 1: Đã duyệt
@@ -57,9 +56,9 @@ public class Team {
     private Integer noFinal;
 
     // Constructor dùng khi chỉ tạo team với tên và hình ảnh
-    public Team(String name, byte[] paymentProof) {
+    public Team(String name, String paymentProofPath) {
         this.teamName = name;
-        this.paymentProof = paymentProof;
+        this.paymentProofPath = paymentProofPath;
     }
 
     // Quan hệ với bảng User (nhiều team có thể thuộc một user)

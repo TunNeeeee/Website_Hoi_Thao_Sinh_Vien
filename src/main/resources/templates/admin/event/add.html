@@ -1,93 +1,165 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head  th:replace="admin/fragments/head::head"></head>
+<head th:replace="admin/fragments/head::head">
+    <!-- Thêm link tới Bootstrap và Font Awesome cho các biểu tượng -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f6f9;
+        }
+        .box {
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+        .box-header {
+            background-color: #17a2b8;
+            color: white;
+            padding: 15px;
+            font-size: 1.5rem;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+        .box-footer {
+            background-color: #f1f1f1;
+            padding: 15px;
+            text-align: center;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .form-control {
+            border-radius: 5px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+        .breadcrumb {
+            background-color: #e9ecef;
+        }
+        .breadcrumb a {
+            color: #007bff;
+        }
+        .breadcrumb .active {
+            color: #6c757d;
+        }
+        .page-header {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
 <body class="hold-transition skin-blue sidebar-mini">
+
 <!-- Site wrapper -->
 <div class="wrapper">
 
     <header th:replace="admin/fragments/header::header"></header>
 
-    <!-- =============================================== -->
+    <!-- Sidebar -->
     <header th:replace="admin/fragments/sidebar::sidebar"></header>
-    <!-- Left side column. contains the sidebar -->
 
-
-    <!-- =============================================== -->
-
-    <!-- Content Wrapper. Contains page content -->
+    <!-- Content Wrapper -->
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
-        <section class="content-header">
-            <h1>
-                Thêm mới hội thao
-
+        <section class="content-header page-header">
+            <h1 class="text-center text-primary">
+                Thêm Mới Hội Thao
             </h1>
-            <ol class="breadcrumb">
-                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-                <li><a href="#">Examples</a></li>
-                <li class="active">Blank page</li>
+            <ol class="breadcrumb justify-content-center">
+                <li><a href="#"><i class="fa fa-home"></i> Home</a></li>
+                <li><a href="#">Event</a></li>
+                <li class="active">Thêm Mới</li>
             </ol>
         </section>
 
         <!-- Main content -->
         <section class="content">
-            <!-- Default box -->
-            <div class="col-md-9">
+            <div class="col-md-8 offset-md-2">
 
+                <!-- Box Form -->
                 <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Thông Tin Hội Thao</h3>
+                    </div>
+
+                    <!-- Form Thêm Mới -->
                     <form role="form" method="post" th:action="@{/admin/add-event}" th:object="${event}">
                         <div class="box-body">
+
+                            <!-- Tên Hội Thao -->
                             <div class="form-group">
-                                <label for="nameEvent">Tên Hội Thao </label>
-                                <input type="text" class="form-control" id="nameEvent"  th:field="*{eventName}">
+                                <label for="nameEvent">Tên Hội Thao</label>
+                                <input type="text" class="form-control" id="nameEvent" th:field="*{eventName}" placeholder="Nhập tên hội thao" required>
                             </div>
+
+                            <!-- Nhà Tài Trợ -->
                             <div class="form-group">
                                 <label for="organizationsName">Nhà Tài Trợ</label>
-                                <input type="text" class="form-control" id="organizationsName"  th:field="*{organizationsName}">
+                                <input type="text" class="form-control" id="organizationsName" th:field="*{organizationsName}" placeholder="Nhập tên nhà tài trợ">
                             </div>
+
+                            <!-- Ngày Bắt Đầu -->
                             <div class="form-group">
                                 <label for="startDate">Ngày Bắt Đầu</label>
-                                <input type="date" class="form-control" id="startDate" th:field="*{startDate}">
+                                <input type="date" class="form-control" id="startDate" th:field="*{startDate}" required>
                             </div>
+
+                            <!-- Ngày Kết Thúc -->
                             <div class="form-group">
                                 <label for="endDate">Ngày Kết Thúc</label>
-                                <input type="date" class="form-control" id="endDate" th:field="*{endDate}">
+                                <input type="date" class="form-control" id="endDate" th:field="*{endDate}" required>
                             </div>
+
+                            <!-- Trạng Thái -->
                             <div class="form-group">
                                 <label for="status">Trạng Thái</label>
-                                <select class="form-control" id="status" th:field="*{status}">
+                                <select class="form-control" id="status" th:field="*{status}" required>
                                     <option value="">Chọn Trạng Thái</option>
                                     <option th:each="status : ${status}"
                                             th:value="${status.id}"
-                                            th:text="${status.statusName}">
-                                    </option>
+                                            th:text="${status.statusName}"></option>
                                 </select>
                             </div>
-                            <div class="box-footer">
-                                <button type="submit" class="btn btn-primary">Thêm</button>
-                                <a th:href="@{/admin/event}" class="btn btn-primary">Thoát</a>
-                            </div>
-
                         </div>
+
+                        <!-- Box Footer -->
+                        <div class="box-footer">
+                            <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Thêm</button>
+                            <a th:href="@{/admin/event}" class="btn btn-secondary"><i class="fa fa-arrow-left"></i> Quay lại</a>
+                        </div>
+
                     </form>
-
-
-
-
-
                 </div>
+                <!-- End Box Form -->
+
             </div>
         </section>
-        <!-- /.content -->
     </div>
     <!-- /.content-wrapper -->
 
     <footer th:replace="admin/fragments/footer::footer"></footer>
+
 </div>
 <!-- ./wrapper -->
 
-<!-- jQuery 3 -->
-
+<!-- jQuery, Bootstrap JS -->
 <div th:replace="admin/fragments/script::script"></div>
+
 </body>
 </html>

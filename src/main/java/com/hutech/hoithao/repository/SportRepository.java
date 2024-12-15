@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface SportRepository extends JpaRepository<Sport, Integer> {
-    List<Sport> findByEventId(Integer id);
+    List<Sport> findByAcademicYear_Id(Integer id);
     List<Sport> findBySportNameContaining(String keyword);
     List<Sport> findByStatus(Integer status);
 }

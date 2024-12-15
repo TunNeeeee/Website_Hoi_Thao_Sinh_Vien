@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,6 +36,9 @@ public class TeamService {
     }
     public long countApprovedTeamsBySport(Integer sportId) {
         return teamRepository.countBySportIdAndStatus(sportId, 2); // 2 là trạng thái đã duyệt
+    }
+    public long countFinishTeamBySport(Integer sportId) {
+        return teamRepository.countBySportIdAndStatus(sportId, 0);
     }
     public List<Team> findTeamsByStatus(Integer sportId, List<Integer> statuses) {
         if (sportId == null) {
