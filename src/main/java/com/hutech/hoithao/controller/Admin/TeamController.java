@@ -46,7 +46,7 @@ public class TeamController {
     @GetMapping("/{id}")
     public String viewTeamDetail(@PathVariable Integer id, Model model) {
         Team team = teamService.findTeamById(id);
-        long approvedTeamCount = teamService.countApprovedTeamsBySport(team.getSport().getId());
+        long  approvedTeamCount = teamService.countApprovedTeamsBySport(team.getSport().getId());
 
         List<Member> memberss = memberService.getMemberByTeamId(id);
         model.addAttribute("members", memberss);
@@ -89,7 +89,7 @@ public class TeamController {
                 teamService.saveTeam(team);
 
                 // Cập nhật trạng thái môn thể thao nếu số lượng đội đã duyệt đạt giới hạn
-                approvedTeamsCount = teamService.countApprovedTeamsBySport(idSport);
+                approvedTeamsCount = teamService.countApprovedTeamsBySport(idSport) + teamService.countFinishTeamBySport(idSport);
                 if (approvedTeamsCount >= sport.getNumberTeamMax()) {
                     sport.setStatus(0); // Môn thể thao đã đủ đội
                     sportService.saveSport(sport);
@@ -105,12 +105,26 @@ public class TeamController {
 
     @PostMapping("/reject/{id}")
     public String rejectTeam(@PathVariable Integer id) {
-        // Xử lý logic không duyệt đội
+        // Tìm đội theo ID
         Team team = teamService.findTeamById(id);
+
         if (team != null) {
+            // Cập nhật trạng thái đội thành không duyệt (ví dụ: -1)
             team.setStatus(-1);
+
+            // Lưu thay đổi vào cơ sở dữ liệu
+            teamService.saveTeam(team);
+
+            // Lấy idSport từ đối tượng Team
+            Integer idSport = team.getSport().getId(); // Giả sử Team có phương thức getSport() trả về đối tượng Sport
+
+            // Chuyển hướng về trang danh sách đội với idSport tương ứng
+            return "redirect:/admin/team-list/" + idSport;
         }
-        teamService.saveTeam(team);
-        return "redirect:/admin/team"; // Chuyển hướng về trang danh sách đội
+
+        // Nếu không tìm thấy đội, có thể chuyển hướng về một trang lỗi hoặc trang danh sách chung
+        // Ví dụ: chuyển hướng về trang danh sách đội chung mà không cần idSport
+        return "redirect:/admin/team-list";
     }
+
 }

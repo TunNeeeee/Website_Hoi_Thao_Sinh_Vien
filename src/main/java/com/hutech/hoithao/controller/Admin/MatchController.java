@@ -616,7 +616,7 @@ public class MatchController {
             team1.setStatus(0);  // Bị loại
 
             // Kiểm tra nếu noRank == 1 thì chuyển status của team2 về 0
-            if (team2.getNoRank() == 1) {
+            if (team2.getNoFinal() == 1) {
                 team2.setStatus(0);  // Chuyển trạng thái thành bị loại
             }
         }

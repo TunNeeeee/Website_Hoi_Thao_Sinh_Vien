@@ -28,7 +28,8 @@ public class MatchService {
     RoundRepository roundRepository;
     MatchMapper matchMapper;
     SportRepository sportRepository;
-
+    SportService sportService;
+    RoundService roundService;
     public Match saveMatch(Match match) {
         return matchRepository.save(match);
     }
@@ -119,5 +120,81 @@ public void generateMatches(Integer sportId) {
     }
     matchRepository.saveAll(matches);
 }
+    public void generateRandomPlayoffMatches(Integer idSport) {
+        // 1. Lấy danh sách các đội đã được duyệt và có status = 2
+        List<Team> eligibleTeams = teamRepository.findBySportIdAndStatus(idSport, 2);
+
+        if (eligibleTeams.size() < 2) {
+            throw new IllegalArgumentException("Không đủ đội với status = 2 để tạo playoff.");
+        }
+
+        // 2. Xáo trộn đội để tạo cặp đấu ngẫu nhiên
+        Collections.shuffle(eligibleTeams);
+
+        // 3. Lấy thông tin môn thể thao
+        Sport sport = sportService.findById(idSport);
+        if (sport == null) {
+            throw new IllegalArgumentException("Môn thể thao không tồn tại.");
+        }
+
+        int numberTeamMax = sport.getNumberTeamMax();
+        String roundName;
+        int roundNumber;
+        switch (numberTeamMax) {
+            case 16:
+                roundName = "Vòng 1/16";
+                roundNumber = 2; // Ví dụ: mã định danh vòng
+                break;
+            case 8:
+                roundName = "Tứ kết";
+                roundNumber = 3;
+                break;
+            case 4:
+                roundName = "Bán kết";
+                roundNumber = 4;
+                break;
+            case 2:
+                roundName = "Chung kết";
+                roundNumber = 5;
+                break;
+            default:
+                throw new IllegalArgumentException("Số đội tối đa không hợp lệ.");
+        }
+
+        // 4. Lấy đối tượng Round (cần đảm bảo rằng Round đã tồn tại trong DB)
+        Round firstRound = roundService.findById(roundNumber);
+
+        // 5. Tạo danh sách trận đấu
+        List<Match> matches = new ArrayList<>();
+        for (int i = 0; i < eligibleTeams.size(); i += 2) {
+            if (i + 1 < eligibleTeams.size()) {
+                Team team1 = eligibleTeams.get(i);
+                Team team2 = eligibleTeams.get(i + 1);
+
+                Match match = new Match();
+                // Không thiết lập ID thủ công
+                match.setTeam1(team1);
+                match.setTeam2(team2);
+                match.setMatchName("PO-" + team1.getId() + "-" + team2.getId());
+                match.setRound(firstRound);
+                // Thiết lập các thuộc tính khác nếu cần, ví dụ:
+                // match.setArena(arena);
+                // match.setMatchDate(LocalDateTime.now());
+                matches.add(match);
+            } else {
+                // Nếu số đội lẻ, tạo trận đấu với đội cuối cùng và đối thủ là "BOT" (Bị loại)
+                Team team = eligibleTeams.get(i);
+                Match match = new Match();
+                match.setTeam1(team);
+                match.setTeam2(null); // Không đối thủ
+                match.setMatchName("PO-" + team.getId() + "-BOT");
+                match.setRound(firstRound);
+                matches.add(match);
+            }
+        }
+
+        // 6. Lưu danh sách trận đấu vào DB
+        matchRepository.saveAll(matches);
+    }
 }
 

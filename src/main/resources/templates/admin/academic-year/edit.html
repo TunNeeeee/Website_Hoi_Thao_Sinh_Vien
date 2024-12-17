@@ -1,20 +1,68 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Chỉnh sửa niên khóa</title>
-</head>
-<body>
-<h1>Chỉnh sửa niên khóa</h1>
-<form th:action="@{/admin/edit-academic-year/{id}(id=${academicYear.id})}" th:object="${academicYear}" method="post">
-    <label>Tên Niên Khóa:</label>
-    <input type="text" th:field="*{nameAcademicYear}" required><br>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:c="http://www.w3.org/1999/XSL/Transform">
+<head th:replace="admin/fragments/head::head"></head>
+<body class="hold-transition skin-blue sidebar-mini">
+<!-- Site wrapper -->
+<div class="wrapper">
 
-    <label>Sự Kiện:</label>
-    <select th:field="*{event.id}" required>
-        <option th:each="event : ${events}" th:value="${event.id}" th:text="${event.eventName}"></option>
-    </select><br>
+    <header th:replace="admin/fragments/header::header"></header>
 
-    <button type="submit">Cập nhật</button>
-</form>
+    <header th:replace="admin/fragments/sidebar::sidebar"></header>
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1>
+                Chỉnh Sửa Niên Khóa
+                <small>Cho Sự Kiện: <span th:text="${eventName}"></span></small>
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="/admin/event"><i class="fa fa-dashboard"></i> Sự Kiện</a></li>
+                <li class="active">Thêm Niên Khóa</li>
+            </ol>
+        </section>
+        <section class="content">
+            <!-- Form box -->
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Thông Tin Niên Khóa</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <!-- form start -->
+                        <form th:action="@{/admin/edit-academic-year/{id}(id=${academicYear.id})}" th:object="${academicYear}" method="post">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <label>Sự Kiện:</label>
+                                    <select th:field="*{event.id}" required>
+                                        <option th:each="event : ${events}" th:value="${event.id}" th:text="${event.eventName}"></option>
+                                    </select><br>
+                                    <label>Tên Niên Khóa:</label>
+                                    <input type="text" th:field="*{nameAcademicYear}" required><br>
+                                </div>
+                                <div class="box-footer">
+                                    <button type="submit">Cập nhật</button>
+                                    <a href="/admin/event" class="btn btn-default"><i class="fa fa-times-circle"></i> Hủy</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- /.box -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </section>
+    </div>
+    <!-- /.content-wrapper -->
+
+    <footer th:replace="admin/fragments/footer::footer"></footer>
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery 3 -->
+<div th:replace="admin/fragments/script::script"></div>
+
 </body>
 </html>

@@ -97,7 +97,7 @@ public class SportController {
 
         // Lưu môn thể thao
         if (sportService.create(sport)) {
-            return "redirect:/admin/sport";
+            return "redirect:/admin/event";
         } else {
             model.addAttribute("errorMessage", "Không thể lưu môn thể thao.");
             return "admin/sport/add";
@@ -135,7 +135,6 @@ public class SportController {
         if (result.hasErrors()) {
             // Nạp lại dữ liệu danh sách events và formats để hiển thị
             sport.setId(id); // Đảm bảo ID không bị mất
-            model.addAttribute("events", eventService.getAllEvents());
             model.addAttribute("formats", formatService.findAll());
             return "admin/sport/edit";
         }
@@ -145,6 +144,9 @@ public class SportController {
         if (existingSport == null) {
             model.addAttribute("errorMessage", "Môn thể thao không tồn tại.");
             return "redirect:/admin/sport"; // Nếu không tìm thấy, chuyển hướng về danh sách sport
+        }
+        if (sport.getAcademicYear() == null) {
+            sport.setAcademicYear(existingSport.getAcademicYear());
         }
         // Giữ nguyên ngày nếu người dùng không nhập
         if (sport.getStartDate() == null) {
@@ -173,7 +175,7 @@ public class SportController {
         }
 
         // Chuyển hướng về trang danh sách sự kiện sau khi cập nhật thành công
-        return "redirect:/admin/sport";
+        return "redirect:/admin/event";
     }
     @GetMapping("/team-list/{sportId}")
     public String getTeamListBySport(@PathVariable Integer sportId, Model model) {
@@ -185,6 +187,11 @@ public class SportController {
         allTeams.addAll(approvedTeams);
         allTeams.addAll(eliminatedTeams);
         Sport sport = sportService.findById(sportId);
+        long approvedTeamsCount = teamService.countApprovedTeamsBySport(sportId) + teamService.countFinishTeamBySport(sportId);
+        if (approvedTeamsCount >= sport.getNumberTeamMax()) {
+            sport.setStatus(0); // Môn thể thao đã đủ đội
+            sportService.saveSport(sport);
+        }
         model.addAttribute("sport", sport);
         model.addAttribute("eliminatedTeams", eliminatedTeams);
         model.addAttribute("approvedTeams", approvedTeams);
@@ -285,6 +292,52 @@ public class SportController {
         teamService.saveAll(selectedTeams);
 
         redirectAttributes.addFlashAttribute("successMessage", "Thêm đội vào bảng đấu thành công!");
+        return "redirect:/admin/" + idSport + "/groups";
+    }
+    @PostMapping("/{idSport}/add-teams-random")
+    public String addTeamsRandom(@PathVariable Integer idSport,
+                                 @RequestParam Integer numberOfTeams, // Số lượng đội muốn thêm ngẫu nhiên
+                                 RedirectAttributes redirectAttributes) {
+
+        // Lấy danh sách các đội chưa tham gia bảng đấu
+        List<Team> teamsNotInGroup = teamService.getTeamsNotInAnyGroup(idSport);
+
+        // Kiểm tra nếu không đủ đội
+        if (teamsNotInGroup.size() < numberOfTeams) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không đủ đội để phân bổ ngẫu nhiên.");
+            return "redirect:/admin/" + idSport + "/groups";
+        }
+
+        // Trộn danh sách đội ngẫu nhiên
+        Collections.shuffle(teamsNotInGroup);
+
+        // Lấy danh sách các bảng đấu hiện có
+        List<Group> availableGroups = groupService.getGroupsBySport(idSport);
+
+        if (availableGroups.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không có bảng đấu nào để thêm đội.");
+            return "redirect:/admin/" + idSport + "/groups";
+        }
+
+        // Phân bổ ngẫu nhiên các đội vào bảng
+        int groupIndex = 0;
+        for (int i = 0; i < numberOfTeams; i++) {
+            Team team = teamsNotInGroup.get(i);
+            Group group = availableGroups.get(groupIndex);
+
+            // Gán đội vào bảng
+            group.getListTeam().add(team);
+            team.setGroup(group);
+
+            // Lưu trữ bảng và đội
+            groupService.saveGroup(group);
+            teamService.saveTeam(team);
+
+            // Chuyển sang bảng kế tiếp (dạng vòng tròn)
+            groupIndex = (groupIndex + 1) % availableGroups.size();
+        }
+
+        redirectAttributes.addFlashAttribute("successMessage", "Phân bổ đội vào bảng thành công!");
         return "redirect:/admin/" + idSport + "/groups";
     }
 
@@ -566,6 +619,17 @@ public class SportController {
     public String viewPlayoff(@PathVariable Integer idSport, Model model) {
         List<Match> matches = matchRepository.findBySportId(idSport);
         Sport sport = sportService.findById(idSport);
+        if (matches.isEmpty()) {
+            // Nếu chưa có trận playoff nào, chuyển hướng đến trang tạo playoff đầu tiên
+            return "redirect:/admin/" + idSport + "/playoff/create-first-round";
+        }
+        boolean allMatchesHaveScores = matches.stream()
+                .allMatch(m -> m.getPoint1() != null && m.getPoint2() != null && m.getPoint1() != -1 && m.getPoint2() != -1);
+
+        boolean hasWinner = matches.stream()
+                .anyMatch(m -> m.getTeam1().getNoFinal() == 1 || m.getTeam2().getNoFinal() == 1);
+        model.addAttribute("allMatchesHaveScores", allMatchesHaveScores);
+        model.addAttribute("hasWinner", hasWinner);
         model.addAttribute("sport", sport);
         model.addAttribute("matches", matches);
         return "/admin/playoff/playoff-tt";
@@ -573,7 +637,7 @@ public class SportController {
 
     @PostMapping("/{idSport}/playoff-tt/generate")
     public String generateMatches(@PathVariable Integer idSport) {
-        matchService.generateMatches(idSport);
+        matchService.generateRandomPlayoffMatches(idSport);
         return "redirect:/admin/{idSport}/playoff-tt";
     }
     @GetMapping("/{idSport}/playoff/create-first-round")
@@ -695,19 +759,18 @@ public class SportController {
     public String createNewRound(@PathVariable("idSport") Integer idSport, Model model) {
         // Lấy danh sách các trận đấu hiện tại cho môn thể thao
         List<Match> currentMatches = matchRepository.findBySportId(idSport);
+        // Tìm ID vòng đấu trước đó
+        Integer previousRoundId = currentMatches.stream()
+                .map(match -> match.getRound().getId())
+                .max(Integer::compareTo)
+                .orElseThrow(() -> new IllegalStateException("Không tìm thấy vòng đấu trước đó."));
 
+        // Lọc các trận đấu thuộc vòng trước đó
+        List<Match> previousRoundMatches = currentMatches.stream()
+                .filter(match -> match.getRound().getId().equals(previousRoundId))
+                .collect(Collectors.toList());
         // Tìm các đội thắng từ vòng trước
-        List<Team> advancingTeams = new ArrayList<>();
-        for (Match match : currentMatches) {
-            if (match.getWinner() != null) {
-                if (match.getWinner() == 1) {
-                    advancingTeams.add(match.getTeam1());
-                } else {
-                    advancingTeams.add(match.getTeam2());
-                }
-            }
-        }
-
+        List<Team> advancingTeams = findAdvancingTeams(previousRoundMatches);
         // Tạo vòng đấu mới nếu đủ đội
         if (advancingTeams.size() < 2) {
             throw new IllegalArgumentException("Không đủ đội để tạo vòng đấu mới.");
@@ -719,7 +782,7 @@ public class SportController {
             match.setTeam1(advancingTeams.get(i * 2));
             match.setTeam2(advancingTeams.get(i * 2 + 1));
             Round round = new Round();
-            round.setId(currentMatches.get(0).getRound().getId()+ 1);
+            round.setId(previousRoundMatches.get(0).getRound().getId()+ 1);
             match.setRound(round); // Tăng số vòng
             newMatches.add(match);
         }
@@ -729,7 +792,19 @@ public class SportController {
 
         return "redirect:/admin/" + idSport + "/playoff-tt";
     }
-
+    private List<Team> findAdvancingTeams(List<Match> currentMatches) {
+        List<Team> advancingTeams = new ArrayList<>();
+        for (Match match : currentMatches) {
+            if (match.getWinner() != null && match.getWinner() != -1) {
+                if (match.getWinner() == 1 && match.getTeam1() != null) {
+                    advancingTeams.add(match.getTeam1());
+                } else if (match.getWinner() == 2 && match.getTeam2() != null) {
+                    advancingTeams.add(match.getTeam2());
+                }
+            }
+        }
+        return advancingTeams;
+    }
     @PostMapping("/{idSport}/playoff-tt/update")
     public String updateMatch(@RequestParam Integer matchId,
                               @RequestParam(required = false) Integer team1Id,

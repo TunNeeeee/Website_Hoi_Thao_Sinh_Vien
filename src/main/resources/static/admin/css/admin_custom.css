@@ -1,0 +1,70 @@
+/* admin_custom.css */
+body {
+    background-color: #f8f9fa;
+}
+.panel {
+    border-radius: 10px;
+}
+.btn {
+    border-radius: 5px;
+}
+.table th, .table td {
+    vertical-align: middle;
+    text-align: center;
+    white-space: nowrap; /* Ngăn xuống dòng */
+    overflow: hidden; /* Cắt chữ nếu quá dài */
+    text-overflow: ellipsis; /* Hiển thị "..." nếu chữ quá dài */
+    max-width: 150px; /* Giới hạn chiều rộng */
+}
+
+.match-result {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    font-weight: bold;
+    color: #fff;
+    border-radius: 50%;
+    margin: 0 5px; /* Cách đều giữa các kết quả */
+}
+
+.panel-heading {
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+.panel-body table {
+    margin-bottom: 0; /* Giảm khoảng cách giữa bảng và nút */
+}
+
+.panel-body {
+    padding: 1rem;
+}
+
+.btn {
+    border-radius: 5px;
+    font-size: 0.9rem; /* Nhỏ gọn hơn */
+}
+
+.result-w {
+    background-color: #28a745; /* Xanh lá */
+}
+.result-d {
+    background-color: #ffc107; /* Vàng */
+}
+.result-l {
+    background-color: #dc3545; /* Đỏ */
+}
+.panel-title a {
+    font-weight: bold;
+}
+.badge-success {
+    background-color: #5cb85c; /* Màu xanh lá */
+    color: white;
+}
+
+.badge-danger {
+    background-color: #d9534f; /* Màu đỏ */
+    color: white;
+}

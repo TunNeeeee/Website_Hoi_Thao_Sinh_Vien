@@ -39,14 +39,18 @@
             <div class="box">
                 <div class="box-header with-border">
                     <h3 class="box-title">Danh sách các trận đấu Playoff</h3>
-                    <a th:href="@{/admin/{idSport}/playoff/create-first-round(idSport=${sport.id})}"
-                       class="btn btn-success pull-right">Tạo Vòng Đấu Đầu Tiên</a>
-                    <form th:action="@{/admin/{idSport}/playoff/new-round(idSport=${sport.id})}" method="post" style="display: inline;">
+
+                    <form th:action="@{/admin/{idSport}/playoff/new-round(idSport=${sport.id})}" method="post" style="display: inline;"
+                          th:if="${allMatchesHaveScores}">
                         <button type="submit" class="btn btn-success pull-right">Tạo Vòng Đấu Mới</button>
                     </form>
-                    <a th:href="@{/admin/{idSport}/ranking-vbpo(idSport=${sport.id})}" class="btn-ranking">
-                        <i class="fas fa-list-ol"></i> Xem Bảng Xếp Hạng Tổng <span>🏆</span>
+
+                    <a th:href="@{/admin/{idSport}/ranking-vbpo(idSport=${sport.id})}" class="btn-ranking"
+                       th:if="${hasWinner}">
+                        Xem Bảng Xếp Hạng Tổng <span>🏆</span>
                     </a>
+
+
                 </div>
 
                 <div class="box-body">
@@ -76,7 +80,7 @@
                             <td th:text="${match.point1 == match.point2 ? match.bonuspoint1 : '-'}">0</td>
                             <td th:classappend="${match.winner == 2 ? 'text-success font-weight-bold' : ''}"
                                 th:text="${match.team2?.teamName ?: 'Chưa có đội'}">Team 2</td>
-                            <td th:text="${match.point2 == null || match.point2 == -1 ? '-' : match.point1}">0</td>
+                            <td th:text="${match.point2 == null || match.point2 == -1 ? '-' : match.point2}">0</td>
                             <td th:text="${match.point1 == match.point2 ? match.bonuspoint2 : '-'}">0</td>
                             <td th:text="${#temporals.format(match.time, 'dd/MM/yyyy')?: 'Chưa cập nhật'} + ' - ' + ${#temporals.format(match.timeStart, 'HH:mm')?: 'Chưa cập nhật'}"></td>
                             <td th:text="${#strings.defaultString(match.arena?.nameArena, 'Chưa cập nhật')}">Địa điểm</td>

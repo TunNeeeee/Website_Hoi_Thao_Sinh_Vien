@@ -132,7 +132,7 @@
                         </td>
                         <td th:text="${sport.status == -1 ? 'Đã xóa' : (sport.status == 0 ? 'Đóng đăng ký' : 'Mở đăng ký')}"></td>
                         <td>
-                            <a th:href="@{/admin/sports/edit/{id}(id=${sport.id})}" class="btn btn-warning btn-sm">
+                            <a th:href="@{/admin/edit-sport/{id}(id=${sport.id})}" class="btn btn-warning btn-sm">
                                 Sửa
                             </a>
                             <a th:href="@{/admin/team-list/{sportId}(sportId=${sport.id})}" class="btn btn-primary btn-sm">

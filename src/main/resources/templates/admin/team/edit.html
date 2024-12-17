@@ -88,10 +88,11 @@
 
                     <!-- Nút quay lại -->
                     <div class="text-center mt-4">
-                        <a th:href="@{/admin/team}" class="btn btn-secondary">
+                        <a th:href="@{/admin/team-list/{idSport}(idSport=${team.sport.id})}" class="btn btn-secondary">
                             <i class="fa fa-arrow-left"></i> Quay Lại
                         </a>
                     </div>
+
                 </div>
             </div>
         </section>

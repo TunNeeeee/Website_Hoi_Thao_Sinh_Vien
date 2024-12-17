@@ -25,6 +25,9 @@
       <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
         <p th:text="${errorMessage}"></p>
       </div>
+      <div th:if="${successMessage}" class="alert alert-success" role="alert">
+        <p th:text="${successMessage}"></p>
+      </div>
 
       <!-- Form tạo vòng đấu -->
       <form th:action="@{/admin/{idSport}/playoff/create-first-round(idSport=${sport.id})}" method="post">
@@ -75,6 +78,16 @@
           </div>
         </div>
       </form>
+
+      <!-- Nút Tạo Playoff Ngẫu Nhiên -->
+      <div class="text-center mt-4">
+        <form th:action="@{/admin/{idSport}/playoff-tt/generate(idSport=${sport.id})}" method="post">
+          <button type="submit" class="btn btn-success btn-lg"
+                  onclick="return confirm('Bạn có chắc chắn muốn tạo playoff ngẫu nhiên');">
+            <i class="fas fa-random"></i> Tạo Playoff Ngẫu Nhiên
+          </button>
+        </form>
+      </div>
     </div>
   </section>
 </div>
@@ -114,8 +127,6 @@
     // Gọi cập nhật ban đầu để xử lý các giá trị mặc định (nếu có)
     updateOptions();
   });
-
 </script>
 </body>
 </html>
-

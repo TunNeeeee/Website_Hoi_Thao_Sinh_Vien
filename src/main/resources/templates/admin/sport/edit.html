@@ -25,9 +25,7 @@
                 <div class="box box-primary">
                     <div class="box-header with-border">
                         <h3 class="box-title">Danh sách các môn thể thao</h3>
-                        <div>
-                            <a href="/admin/sport/add" class="btn btn-success">Thêm Mới Môn Thể Thao</a>
-                        </div>
+
                     </div>
 
                     <!-- Form chỉnh sửa -->
@@ -38,16 +36,6 @@
 
                         <div class="box-body">
                             <!-- Hội thao -->
-                            <div class="form-group">
-                                <label>Hội Thao</label>
-                                <select class="form-control" th:field="*{event.id}" required>
-                                    <option value="" disabled>-- Chọn Hội Thao --</option>
-                                    <option th:each="event : ${events}"
-                                            th:value="${event.id}"
-                                            th:text="${event.eventName}"
-                                            th:selected="*{event != null and event.id == event.id}"></option>
-                                </select>
-                            </div>
 
                             <!-- Tên môn thể thao -->
                             <div class="form-group">

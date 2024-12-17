@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.Set;
 public class SportService {
     @Autowired
     private SportRepository sportRepository;
+    private TransactionService transactionService;
     private GroupRepository groupRepository;
     private TeamRepository teamRepository;
     public List<Sport> getAllSports() {
@@ -91,24 +93,24 @@ public class SportService {
     public List<Sport> getActiveSports() {
         return sportRepository.findByStatus(1); // Giả sử bạn đã có method này trong repository
     }
-    @Transactional
-    public void updateSportStatus() {
-        // Lấy danh sách môn thể thao có trạng thái 1
-        List<Sport> sports = sportRepository.findByStatus(1);
-
-        // Kiểm tra từng môn thể thao
-        for (Sport sport : sports) {
-            if (sport.getStartDate().isBefore(LocalDate.now()) || sport.getStartDate().isEqual(LocalDate.now())) {
-                // Cập nhật trạng thái
-                sport.setStatus(0);
-                sportRepository.save(sport); // Lưu lại thay đổi
-            }
-        }
-    }
+//    @Transactional
+//    public void updateSportStatus() {
+//        // Lấy danh sách môn thể thao có trạng thái 1
+//        List<Sport> sports = sportRepository.findByStatus(1);
+//
+//        // Kiểm tra từng môn thể thao
+//        for (Sport sport : sports) {
+//            if (sport.getStartDate().isBefore(LocalDate.now()) || sport.getStartDate().isEqual(LocalDate.now())) {
+//                // Cập nhật trạng thái
+//                sport.setStatus(0);
+//                sportRepository.save(sport); // Lưu lại thay đổi
+//            }
+//        }
+//    }
     // Lên lịch kiểm tra trạng thái (nếu muốn tích hợp trực tiếp)
     @Scheduled(cron = "0 0 0 * * ?") // Chạy hàng ngày lúc 00:00
     public void scheduleUpdateSportStatus() {
-        updateSportStatus();
+        transactionService.updateSportStatus();
     }
 
     public Sport findSportByTeam(Team team) {

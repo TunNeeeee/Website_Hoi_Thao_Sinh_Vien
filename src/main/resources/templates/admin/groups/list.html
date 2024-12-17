@@ -1,320 +1,344 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tạo và Quản lý Bảng Đấu</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .card {
-            border-radius: 10px;
-        }
-        .btn {
-            border-radius: 5px;
-        }
-        .table th, .table td {
-            vertical-align: middle;
-        }
-        .table th, .table td {
-            vertical-align: middle;
-            text-align: center;
-            white-space: nowrap; /* Ngăn xuống dòng */
-            overflow: hidden; /* Cắt chữ nếu quá dài */
-            text-overflow: ellipsis; /* Hiển thị "..." nếu chữ quá dài */
-            max-width: 150px; /* Giới hạn chiều rộng */
-        }
+<head th:replace="admin/fragments/head :: head"></head>
+<style>
+    .accordion .card-header {
+        cursor: pointer;
+    }
 
-        .match-result {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            line-height: 30px;
-            text-align: center;
-            font-weight: bold;
-            color: #fff;
-            border-radius: 50%;
-            margin: 0 5px; /* Cách đều giữa các kết quả */
-        }
+    .accordion .btn-link {
+        text-decoration: none;
+    }
 
-        .card-header {
-            text-align: center;
-            font-size: 1.2rem;
-        }
+    .accordion .btn-link[aria-expanded="true"] .fa-chevron-down {
+        transform: rotate(180deg);
+        transition: transform 0.3s ease;
+    }
 
-        .card-body table {
-            margin-bottom: 0; /* Giảm khoảng cách giữa bảng và nút */
-        }
+    .accordion .btn-link .fa-chevron-down {
+        transition: transform 0.3s ease;
+    }
 
-        .card-body {
-            padding: 1rem;
-        }
+    /* Tùy chỉnh khoảng cách cho bảng */
+    .table thead th {
+        text-align: center;
+    }
 
-        .btn {
-            border-radius: 5px;
-            font-size: 0.9rem; /* Nhỏ gọn hơn */
-        }
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
 
-        .result-w {
-            background-color: #28a745; /* Xanh lá */
-        }
-        .result-d {
-            background-color: #ffc107; /* Vàng */
-        }
-        .result-l {
-            background-color: #dc3545; /* Đỏ */
-        }
-        .accordion-button {
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-<div class="container mt-4">
-    <h1 class="text-center mb-4 text-primary">Tạo và Quản Lý Bảng Đấu</h1>
+    .form-check-input {
+        margin-top: 0.3rem;
+    }
 
-    <!-- Navigation Buttons -->
-    <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
-        <a th:href="@{/admin/team-list/{idSport}(idSport=${sport.id})}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Quay lại
-        </a>
-        <a th:href="@{/admin/{idSport}/create-match-vb(idSport=${sport.id})}" class="btn btn-success">
-            <i class="fas fa-plus-circle"></i> Tạo Trận Đấu
-        </a>
-        <a th:href="@{/admin/{idSport}/schedule(idSport=${sport.id})}" class="btn btn-primary">
-            <i class="fas fa-calendar-alt"></i> Xem Lịch Đấu
-        </a>
-        <span th:if="${sport.format.getId() == 3}">
-            <a th:href="@{/admin/{idSport}/playoff(idSport=${sport.id})}" class="btn btn-warning">
-                <i class="fas fa-trophy"></i> Đi đến Vòng Playoff
-            </a>
-        </span>
-        <span th:if="${sport.format.getId() == 1}">
-            <a th:href="@{/admin/{idSport}/ranking(idSport=${sport.id})}" class="btn btn-info">
-                <i class="fas fa-list-ol"></i> Xem Bảng Xếp Hạng Tổng
-            </a>
-        </span>
-    </div>
+</style>
 
-    <!-- Group List -->
-    <div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
-        <div th:each="group : ${groups}" class="col">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 th:text="'BẢNG ' + ${group.groupName}" class="mb-0"></h5>
+<body class="hold-transition skin-blue sidebar-mini">
+<!-- Site wrapper -->
+<div class="wrapper">
+
+    <!-- Header -->
+    <header th:replace="admin/fragments/header :: header"></header>
+
+    <!-- Sidebar -->
+    <aside th:replace="admin/fragments/sidebar :: sidebar"></aside>
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Tạo và Quản Lý Bảng Đấu
+                <small>Chuyên nghiệp và Đẹp Mắt</small>
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="/admin/event"><i class="fa fa-dashboard"></i> Sự Kiện</a></li>
+                <li class="active">Quản Lý Bảng Đấu</li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+                <h2 class="text-center mb-4 text-primary">Tạo và Quản Lý Bảng Đấu</h2>
+
+                <!-- Navigation Buttons -->
+                <div class="text-center mb-4">
+                    <a th:href="@{/admin/team-list/{idSport}(idSport=${sport.id})}" class="btn btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Quay Lại
+                    </a>
+                    <a th:href="@{/admin/{idSport}/create-match-vb(idSport=${sport.id})}" class="btn btn-success">
+                        <i class="fa fa-plus-circle"></i> Tạo Trận Đấu
+                    </a>
+                    <a class="btn btn-primary" data-toggle="modal" data-target="#addTeamsModal">
+                        <i class="fa fa-users"></i> Thêm Đội Vào Bảng
+                    </a>
+                    <span th:if="${sport.format.id == 3}">
+                            <a th:href="@{/admin/{idSport}/playoff(idSport=${sport.id})}" class="btn btn-warning">
+                                <i class="fa fa-trophy"></i> Đi đến Vòng Playoff
+                            </a>
+                        </span>
+                    <span th:if="${sport.format.id == 1}">
+                            <a th:href="@{/admin/{idSport}/ranking(idSport=${sport.id})}" class="btn btn-info">
+                                <i class="fa fa-list-ol"></i> Xem Bảng Xếp Hạng Tổng
+                            </a>
+                        </span>
                 </div>
-                <div class="card-body">
-                    <table class="table table-striped table-hover table-sm">
-                        <thead class="table-light">
-                        <tr>
-                            <th>TT</th>
-                            <th>Đội</th>
-                            <th>Trận</th>
-                            <th>Điểm</th>
-                            <th>Hiệu Số</th>
-                            <th>3 Trận Gần Nhất</th>
-                            <th>Trạng Thái</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="team, iter : ${sortedTeamsByGroup[group.id]}">
-                            <td th:text="${iter.index + 1}"></td>
-                            <td th:text="${team.teamName}" style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"></td>
-                            <td th:text="${team.numberGame}"></td>
-                            <td th:text="${team.point}"></td>
-                            <td th:text="${team.hs}"></td>
-                            <td>
-                <span th:each="result : ${lastThreeResultsByTeam[team.id]}"
-                      th:classappend="${result == 'W' ? 'match-result result-w'
-                                   : (result == 'L' ? 'match-result result-l'
-                                   : 'match-result result-d')}"
-                      th:text="${result != null ? result : '-'}"></span>
-                            </td>
-                            <td>
-                                <span th:if="${sport.format.getId() == 3 and iter.index + 1 <= 2}" class="badge bg-success">Đi Tiếp</span>
-                                <span th:if="${sport.format.getId() == 3 and iter.index + 1 > 2}" class="badge bg-danger">Bị Loại</span>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
 
-                    <!-- Save Results Button -->
-                    <div class="text-end mt-2">
-                        <form th:action="@{/admin/{idSport}/save-results/{groupId}(idSport=${sport.id}, groupId=${group.id})}" method="post">
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-save"></i> Lưu Kết Quả
-                            </button>
-                        </form>
-                    </div>
-                </div>
-                <!-- Form thêm đội vào bảng -->
-                <form th:action="@{/admin/{idSport}/add-teams-to-group(groupId=${group.id},idSport=${sport.id})}" method="post">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Thêm Đội:</label>
-                        <!-- Accordion chứa danh sách đội -->
-                        <div class="accordion" id="teamAccordion">
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingTeamList">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                            data-bs-target="#collapseTeamList" aria-expanded="false" aria-controls="collapseTeamList">
-                                        Danh Sách Đội Chưa Tham Gia
-                                    </button>
-                                </h2>
-                                <div id="collapseTeamList" class="accordion-collapse collapse" aria-labelledby="headingTeamList"
-                                     data-bs-parent="#teamAccordion">
-                                    <div class="accordion-body">
-                                        <!-- Thanh tìm kiếm -->
-                                        <input type="text" id="teamSearch" class="form-control mb-3" placeholder="Tìm kiếm đội...">
-                                        <!-- Bảng danh sách đội -->
-                                        <table class="table table-bordered table-hover">
-                                            <thead class="table-light">
-                                            <tr>
-                                                <th>Chọn</th>
-                                                <th>Tên Đội</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody id="teamList">
-                                            <tr th:each="team : ${teamsNotInGroup}">
-                                                <td>
-                                                    <input class="form-check-input" type="checkbox" th:name="teamIds"
-                                                           th:value="${team.id}">
-                                                </td>
-                                                <td th:text="${team.teamName}"></td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
+                <!-- Group List -->
+                <div class="row">
+                    <div th:each="group : ${groups}" class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading bg-primary text-white">
+                                <h4 class="panel-title" th:text="'BẢNG ' + ${group.groupName}"></h4>
+                            </div>
+                            <div class="panel-body">
+                                <table class="table table-striped table-hover table-condensed">
+                                    <thead>
+                                    <tr>
+                                        <th>TT</th>
+                                        <th>Đội</th>
+                                        <th>Trận</th>
+                                        <th>Điểm</th>
+                                        <th>Hiệu Số</th>
+                                        <th>3 Trận Gần Nhất</th>
+                                        <th>Trạng Thái</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="team, iter : ${sortedTeamsByGroup[group.id]}">
+                                        <td th:text="${iter.index + 1}"></td>
+                                        <td th:text="${team.teamName}" style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"></td>
+                                        <td th:text="${team.numberGame}"></td>
+                                        <td th:text="${team.point}"></td>
+                                        <td th:text="${team.hs}"></td>
+                                        <td>
+                                                    <span th:each="result : ${lastThreeResultsByTeam[team.id]}"
+                                                          th:classappend="${result == 'W' ? 'match-result result-w'
+                                                                       : (result == 'L' ? 'match-result result-l'
+                                                                       : 'match-result result-d')}"
+                                                          th:text="${result != null ? result : '-'}"></span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${sport.format.id == 3 and iter.index + 1 <= 2}" class="badge badge-success">Đi Tiếp</span>
+                                            <span th:if="${sport.format.id == 3 and iter.index + 1 > 2}" class="badge badge-danger">Bị Loại</span>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+
+                                <!-- Save Results Button -->
+                                <div class="text-right">
+                                    <form th:action="@{/admin/{idSport}/save-results/{groupId}(idSport=${sport.id}, groupId=${group.id})}" method="post">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fa fa-save"></i> Lưu Kết Quả
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Form thêm đội vào bảng -->
+                            <div class="modal fade" id="addTeamsModal" tabindex="-1" role="dialog" aria-labelledby="addTeamsLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <!-- Header -->
+                                        <div class="modal-header bg-primary text-white">
+                                            <h5 class="modal-title" id="addTeamsLabel">Thêm Đội Vào Bảng</h5>
+                                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+
+                                        <!-- Body -->
+                                        <div class="modal-body">
+                                            <!-- Tabs Chọn Thủ Công và Random -->
+                                            <ul class="nav nav-tabs" id="teamTabs" role="tablist">
+                                                <li class="nav-item">
+                                                    <a class="nav-link active" id="manual-tab" data-toggle="tab" href="#manual" role="tab" aria-controls="manual" aria-selected="true">Chọn Thủ Công</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" id="random-tab" data-toggle="tab" href="#random" role="tab" aria-controls="random" aria-selected="false">Chọn Ngẫu Nhiên</a>
+                                                </li>
+                                            </ul>
+
+                                            <!-- Nội dung Tabs -->
+                                            <div class="tab-content mt-3" id="teamTabsContent">
+                                                <!-- Chọn Thủ Công -->
+                                                <div class="tab-pane fade show active" id="manual" role="tabpanel" aria-labelledby="manual-tab">
+                                                    <form th:action="@{/admin/{idSport}/add-teams-to-group(idSport=${sport.id})}" method="post">
+                                                        <!-- Chọn Bảng Đấu -->
+                                                        <div class="form-group">
+                                                            <label for="groupSelect">Chọn Bảng Đấu:</label>
+                                                            <select class="form-control" id="groupSelect" name="groupId" required>
+                                                                <option th:each="group : ${groups}" th:value="${group.id}" th:text="${group.groupName}"></option>
+                                                            </select>
+                                                        </div>
+
+                                                        <!-- Danh sách đội -->
+                                                        <table class="table table-bordered">
+                                                            <thead>
+                                                            <tr>
+                                                                <th>Chọn</th>
+                                                                <th>Tên Đội</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            <tr th:each="team : ${teamsNotInGroup}">
+                                                                <td class="text-center">
+                                                                    <input type="checkbox" th:name="teamIds" th:value="${team.id}">
+                                                                </td>
+                                                                <td th:text="${team.teamName}"></td>
+                                                            </tr>
+                                                            <tr th:if="${#lists.isEmpty(teamsNotInGroup)}">
+                                                                <td colspan="2" class="text-center text-muted">Không có đội nào chưa tham gia bảng đấu.</td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <button type="submit" class="btn btn-success">Thêm Đội</button>
+                                                    </form>
+                                                </div>
+
+                                                <!-- Chọn Ngẫu Nhiên -->
+                                                <div class="tab-pane fade" id="random" role="tabpanel" aria-labelledby="random-tab">
+                                                    <form th:action="@{/admin/{idSport}/add-teams-random(idSport=${sport.id})}" method="post">
+                                                        <div class="form-group">
+                                                            <label for="numberOfTeams">Số đội ngẫu nhiên:</label>
+                                                            <input type="number" class="form-control" id="numberOfTeams" name="numberOfTeams" min="2" required>
+                                                        </div>
+                                                        <button type="submit" class="btn btn-primary">Phân Ngẫu Nhiên</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-success btn-sm">
-                        <i class="fas fa-plus-circle"></i> Thêm đội vào bảng
+                </div>
+
+                <!-- Tạo Bảng Đấu Mới -->
+                <form th:action="@{/admin/{idSport}/create-group(idSport=${sport.id})}" method="post">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fa fa-plus"></i> Tạo Bảng Đấu Mới
                     </button>
                 </form>
 
-            </div>
-        </div>
-    </div>
-    <form th:action="@{/admin/{idSport}/create-group(idSport=${sport.id})}" method="post">
-        <button type="submit" class="btn btn-primary w-100">
-            <i class="fas fa-plus"></i> Tạo Bảng Đấu Mới
-        </button>
-    </form>
-    <!-- Match List -->
-    <div class="row g-4">
-        <!-- Matches Without Results -->
-        <div class="col-12">
-            <div class="card shadow-lg border-warning mb-4">
-                <div class="card-header bg-warning text-dark text-center">
-                    <h4 class="mb-0"><i class="fas fa-hourglass-half"></i> Trận đấu chưa có kết quả</h4>
-                </div>
-                <div class="card-body">
-                    <table class="table table-striped table-hover align-middle">
-                        <thead>
-                        <tr class="table-warning text-center">
-                            <th>Tên Trận</th>
-                            <th>Chi Tiết</th>
-                            <th>Thao Tác</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="match : ${matches}" th:if="${match.point1 == -1 and match.point2 == -1}">
-                            <td th:text="${match.matchName}" class="text-center fw-bold"></td>
-                            <td>
-                                <div><i class="fas fa-users"></i> <span th:text="${match.team1.teamName}"></span> vs <span th:text="${match.team2.teamName}"></span></div>
-                                <div><i class="fas fa-map-marker-alt"></i> <strong>Địa điểm: </strong><span th:text="${match.arena.nameArena}"></span></div>
-                                <div><i class="fas fa-clock"></i>
-                                    <strong>Thời gian:</strong>
-                                    <span th:text="${#temporals.format(match.time, 'dd/MM/yyyy')}+ ' - ' + ${#temporals.format(match.timeStart, 'HH:mm')}"></span>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <a th:href="@{/admin/{idSport}/update-match/{matchId}(idSport=${sport.id}, matchId=${match.id})}"
-                                   class="btn btn-primary btn-sm">
-                                    <i class="fas fa-edit"></i> Cập Nhật Kết Quả
-                                </a>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+                <!-- Match List -->
+                <div class="row">
+                    <!-- Matches Without Results -->
+                    <div class="col-md-12">
+                        <div class="panel panel-warning">
+                            <div class="panel-heading text-center">
+                                <h4><i class="fa fa-hourglass-half"></i> Trận đấu chưa có kết quả</h4>
+                            </div>
+                            <div class="panel-body">
+                                <table class="table table-striped table-hover table-condensed">
+                                    <thead>
+                                    <tr class="warning text-center">
+                                        <th>Tên Trận</th>
+                                        <th>Chi Tiết</th>
+                                        <th>Thao Tác</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="match : ${matches}" th:if="${match.point1 == -1 and match.point2 == -1}">
+                                        <td th:text="${match.matchName}" class="text-center fw-bold"></td>
+                                        <td>
+                                            <div><i class="fa fa-users"></i> <span th:text="${match.team1.teamName}"></span> vs <span th:text="${match.team2.teamName}"></span></div>
+                                            <div><i class="fa fa-map-marker"></i> <strong>Địa điểm: </strong><span th:text="${match.arena.nameArena}"></span></div>
+                                            <div><i class="fa fa-clock-o"></i>
+                                                <strong>Thời gian:</strong>
+                                                <span th:text="${#temporals.format(match.time, 'dd/MM/yyyy')} + ' - ' + ${#temporals.format(match.timeStart, 'HH:mm')}"></span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <a th:href="@{/admin/{idSport}/update-match/{matchId}(idSport=${sport.id}, matchId=${match.id})}"
+                                               class="btn btn-primary btn-sm">
+                                                <i class="fa fa-edit"></i> Cập Nhật Kết Quả
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
 
-        <!-- Matches With Results -->
-        <div class="col-12">
-            <div class="card shadow-lg border-success">
-                <div class="card-header bg-success text-white text-center">
-                    <h4 class="mb-0"><i class="fas fa-check-circle"></i> Trận đấu đã cập nhật kết quả</h4>
-                </div>
-                <div class="card-body">
-                    <table class="table table-bordered table-hover align-middle">
-                        <thead class="table-success text-center">
-                        <tr>
-                            <th>Tên Trận</th>
-                            <th>Chi Tiết</th>
-                            <th>Kết Quả</th>
-                            <th>Thao Tác</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="match : ${matches}" th:if="${match.point1 != -1 and match.point2 != -1}">
-                            <td th:text="${match.matchName}" class="text-center fw-bold"></td>
-                            <td>
-                                <div><i class="fas fa-users"></i> <span th:text="${match.team1.teamName}"></span> vs <span th:text="${match.team2.teamName}"></span></div>
-                                <div><i class="fas fa-map-marker-alt"></i> <strong>Địa điểm: </strong><span th:text="${match.arena.nameArena}"></span></div>
-                                <div><i class="fas fa-clock"></i>
-                                    <strong>Thời gian:</strong>
-                                    <span th:text="${#temporals.format(match.time, 'dd/MM/yyyy')}+ ' - ' + ${#temporals.format(match.timeStart, 'HH:mm')}"></span>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <div>
-                                    <span th:class="${match.point1 > match.point2 ? 'badge bg-success' : 'badge bg-danger'}">
-                                        <span th:text="${match.point1}"></span>
-                                    </span>
-                                    :
-                                    <span th:class="${match.point2 > match.point1 ? 'badge bg-success' : 'badge bg-danger'}">
-                                        <span th:text="${match.point2}"></span>
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <a th:href="@{/admin/{idSport}/update-point/{matchId}(idSport=${sport.id}, matchId=${match.id})}"
-                                   class="btn btn-primary btn-sm">
-                                    <i class="fas fa-edit"></i> Sửa Kết Quả
-                                </a>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <!-- Matches With Results -->
+                    <div class="col-md-12">
+                        <div class="panel panel-success">
+                            <div class="panel-heading text-center text-white">
+                                <h4><i class="fa fa-check-circle"></i> Trận đấu đã cập nhật kết quả</h4>
+                            </div>
+                            <div class="panel-body">
+                                <table class="table table-bordered table-hover table-condensed">
+                                    <thead class="success text-center">
+                                    <tr>
+                                        <th>Tên Trận</th>
+                                        <th>Chi Tiết</th>
+                                        <th>Kết Quả</th>
+                                        <th>Thao Tác</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="match : ${matches}" th:if="${match.point1 != -1 and match.point2 != -1}">
+                                        <td th:text="${match.matchName}" class="text-center fw-bold"></td>
+                                        <td>
+                                            <div><i class="fa fa-users"></i> <span th:text="${match.team1.teamName}"></span> vs <span th:text="${match.team2.teamName}"></span></div>
+                                            <div><i class="fa fa-map-marker"></i> <strong>Địa điểm: </strong><span th:text="${match.arena.nameArena}"></span></div>
+                                            <div><i class="fa fa-clock-o"></i>
+                                                <strong>Thời gian:</strong>
+                                                <span th:text="${#temporals.format(match.time, 'dd/MM/yyyy')} + ' - ' + ${#temporals.format(match.timeStart, 'HH:mm')}"></span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div>
+                                                        <span th:class="${match.point1 > match.point2 ? 'badge badge-success' : 'badge badge-danger'}">
+                                                            <span th:text="${match.point1}"></span>
+                                                        </span>
+                                                :
+                                                <span th:class="${match.point2 > match.point1 ? 'badge badge-success' : 'badge badge-danger'}">
+                                                            <span th:text="${match.point2}"></span>
+                                                        </span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <a th:href="@{/admin/{idSport}/update-point/{matchId}(idSport=${sport.id}, matchId=${match.id})}"
+                                               class="btn btn-primary btn-sm">
+                                                <i class="fa fa-edit"></i> Sửa Kết Quả
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
+        <!-- /.content -->
     </div>
+    <!-- /.content-wrapper -->
 
+    <!-- Footer -->
+    <footer th:replace="admin/fragments/footer :: footer"></footer>
 </div>
+<!-- ./wrapper -->
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Scripts -->
+<div th:replace="admin/fragments/script :: script"></div>
+
 <!-- Custom Script for Search -->
-<script>
-    document.getElementById('teamSearch').addEventListener('input', function () {
-        const searchValue = this.value.toLowerCase();
-        const teamRows = document.querySelectorAll('#teamList tr');
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<!-- Modal Bootstrap -->
 
-        teamRows.forEach(row => {
-            const teamName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-            row.style.display = teamName.includes(searchValue) ? '' : 'none';
-        });
-    });
-</script>
+
 </body>
 </html>
