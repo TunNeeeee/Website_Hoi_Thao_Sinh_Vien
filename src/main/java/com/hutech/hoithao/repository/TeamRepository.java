@@ -1,6 +1,7 @@
 package com.hutech.hoithao.repository;
 
 import com.hutech.hoithao.models.Group;
+import com.hutech.hoithao.models.Member;
 import com.hutech.hoithao.models.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -48,5 +49,5 @@ public interface TeamRepository extends JpaRepository<Team, Integer> {
             @Param("sportId") Integer sportId,
             @Param("noRank") Integer noRank
            );
-
+    List<Team> findByListMemberContains(Member member);
 }

@@ -31,4 +31,5 @@ public interface MatchRepository extends JpaRepository<Match, Integer> {
     List<Match> findLastThreeMatchesByTeamIdAndRound(@Param("teamId") Integer teamId, @Param("round") Round round, Pageable pageable);
     @Query("SELECT m FROM Match m WHERE m.team1.sport.id = :sportId OR m.team2.sport.id = :sportId")
     List<Match> findBySportId(@Param("sportId") Integer sportId);
+    List<Match> findByTeam1IdInOrTeam2IdInAndRound(List<Integer> teamIds1, List<Integer> teamIds2, Round round);
 }

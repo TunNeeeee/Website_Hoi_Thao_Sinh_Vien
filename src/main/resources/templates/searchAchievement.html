@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tra cứu thành tích sinh viên</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url('https://image.shutterstock.com/image-vector/modern-colored-poster-sports-vector-260nw-1349231597.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 40px 30px;
+            border-radius: 10px;
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .alert {
+            margin-top: 20px;
+            font-weight: 500;
+        }
+
+        .card {
+            background-color: #ffffff;
+            color: #333;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #007bff;
+        }
+
+        .card-text {
+            font-size: 1.1rem;
+        }
+
+        .card-footer {
+            font-weight: 600;
+            color: #28a745;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            padding: 12px 0;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            width: 100%;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .form-group label {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            border-radius: 5px;
+            padding: 15px;
+            font-size: 1rem;
+            background-color: #e0e0e0;
+            border: none;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Tra cứu thành tích sinh viên</h1>
+
+
+
+    <!-- Thông báo nếu không tìm thấy -->
+    <div th:if="${message}" class="alert alert-warning mt-4" role="alert">
+        <span th:text="${message}"></span>
+    </div>
+
+    <!-- Hiển thị thành tích nếu có -->
+    <div th:if="${topTeams}" class="mt-5">
+        <div class="row">
+            <div th:each="team : ${topTeams}" class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${team.sport.academicYear.event.eventName}"></h5>
+                        <p class="card-text" th:text="'Môn thể thao: ' + ${team.sport.sportName}"></p>
+                        <p class="card-text" th:text="'Niên khóa: ' + ${team.sport.academicYear.nameAcademicYear}"></p>
+                    </div>
+                    <div class="card-footer">
+                        <span th:if="${team.noFinal <= 4}" th:text="'Hạng ' + ${team.noFinal}">Hạng X</span>
+                        <span th:if="${team.noFinal > 4}" th:text="'Đã tham gia'">Tham gia</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn btn-primary" type="button" onclick="window.location.href='/search'">Quay lại</button>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

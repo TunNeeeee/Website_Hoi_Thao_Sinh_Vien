@@ -23,4 +23,7 @@ public class MemberService {
     public List<Member> getMemberByTeamId(Integer id) {
         return memberRepository.findMembersByTeamId(id);
     }
+    public List<Member> findMemberByNameAndMSSV(String name, String mssv) {
+        return memberRepository.findByNameMemberAndMssv(name, mssv);
+    }
 }

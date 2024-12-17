@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Integer> {
     List<Member> findMembersByTeamId(Integer id);
+    List<Member> findByNameMemberAndMssv(String nameMember, String mssv);
 }

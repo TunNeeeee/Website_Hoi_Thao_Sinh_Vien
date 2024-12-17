@@ -284,7 +284,7 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <tr th:each="match : ${matches}" th:if="${match.point1 != -1 and match.point2 != -1}">
+                                    <tr th:each="match : ${matches}" th:if="${match.point1 != -1 and match.point2 != -1 and match.point1!= null and match.point2 != null}">
                                         <td th:text="${match.matchName}" class="text-center fw-bold"></td>
                                         <td>
                                             <div><i class="fa fa-users"></i> <span th:text="${match.team1.teamName}"></span> vs <span th:text="${match.team2.teamName}"></span></div>

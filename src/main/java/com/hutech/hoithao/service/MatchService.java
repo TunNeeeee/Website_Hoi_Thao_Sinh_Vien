@@ -1,6 +1,5 @@
 package com.hutech.hoithao.service;
 
-import com.hutech.hoithao.domains.dtos.TeamDTO;
 import com.hutech.hoithao.models.*;
 import com.hutech.hoithao.repository.MatchRepository;
 import com.hutech.hoithao.repository.RoundRepository;
@@ -10,10 +9,7 @@ import com.hutech.hoithao.utils.mappers.MatchMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -88,6 +84,16 @@ public class MatchService {
     }
     public Optional<Match> findMatch(Team team1, Team team2, Round round) {
         return matchRepository.findByTeam1AndTeam2AndRound(team1, team2, round);
+    }
+    public List<Match> findMatchesBySportAndRound(Integer idSport, Round round) {
+        // Lấy danh sách các đội thuộc môn thể thao
+        List<Team> teams = teamRepository.findBySportId(idSport);
+
+        // Lấy danh sách ID của các đội
+        List<Integer> teamIds = teams.stream().map(Team::getId).toList();
+
+        // Lấy danh sách trận đấu có liên quan đến các đội này và round = round
+        return matchRepository.findByTeam1IdInOrTeam2IdInAndRound(teamIds, teamIds, round);
     }
 //    public List<Match> getLastThreeMatchesByTeamInRound(Integer teamId, int round) {
 //        Pageable pageable = PageRequest.of(0, 3); // Lấy 3 trận đầu tiên

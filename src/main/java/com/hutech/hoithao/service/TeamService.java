@@ -1,6 +1,7 @@
 package com.hutech.hoithao.service;
 
 import com.hutech.hoithao.models.Match;
+import com.hutech.hoithao.models.Member;
 import com.hutech.hoithao.models.Round;
 import com.hutech.hoithao.models.Team;
 import com.hutech.hoithao.repository.MatchRepository;
@@ -103,5 +104,8 @@ public class TeamService {
                     }
                 })
                 .collect(Collectors.toList());
+    }
+    public List<Team> findTeamsByMember(Member member) {
+        return teamRepository.findByListMemberContains(member);
     }
 }

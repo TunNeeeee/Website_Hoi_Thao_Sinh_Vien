@@ -431,7 +431,7 @@ public class MatchController {
         redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trận đấu thành công!");
 
         // Chuyển hướng về trang chi tiết trận đấu hoặc danh sách trận đấu
-        return "redirect:/admin/" + sport.getId() + "/playoff-tt";  // Redirect tới trang playoff của môn thể thao
+        return "redirect:/admin/" + sport.getId() + "/playoff";  // Redirect tới trang playoff của môn thể thao
     }
     //------------------------------------------------------------------------------------------------
     @GetMapping("/updateMatchTT/{team1Id}/{team2Id}/{roundId}")

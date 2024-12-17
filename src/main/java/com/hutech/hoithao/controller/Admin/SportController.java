@@ -236,9 +236,10 @@ public class SportController {
                 lastThreeResultsByTeam.put(team.getId(), lastThreeResults);
             }
         }
-
+        Round round = new Round();
+        round.setId(1);
         model.addAttribute("teamsNotInGroup", teamService.getTeamsNotInAnyGroup(idSport));
-        model.addAttribute("matches", matchService.findMatchesBySport(idSport)); // Lấy danh sách trận đấu
+        model.addAttribute("matches", matchService.findMatchesBySportAndRound(idSport,round)); // Lấy danh sách trận đấu
         model.addAttribute("sport", sport);
         model.addAttribute("groups", groups);
         model.addAttribute("sortedTeamsByGroup", sortedTeamsByGroup); // Gửi danh sách đã sắp xếp
