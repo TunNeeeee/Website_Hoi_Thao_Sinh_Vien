@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Giấy chứng nhận</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            padding: 30px;
+        }
+
+        /* Certificate Container Style */
+        .certificate-container {
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 80%;
+            margin: 0 auto;
+            background: url("/image/khung_chung_nhan.png") no-repeat center;
+            background-size: 100% 100%;
+        }
+
+        /* Logo inside the certificate */
+        .certificate-container img {
+            max-width: 120px;
+            margin-bottom: 20px;
+        }
+
+        /* Title Styles */
+        .certificate-container h6 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: RED; /* Blue for "Trao" */
+            margin-top: 20px;
+        }
+
+        .certificate-container h4 {
+            color: #007bff; /* Red for "Giấy chứng nhận" */
+        }
+
+        /* Text Styles for Information */
+        .certificate-container p {
+            font-size: 1.2rem;
+            margin-top: 20px;
+            color: #333;
+        }
+
+        .certificate-container p span {
+            font-weight: bold;
+            /*color: BLACK; !* Blue for student name *!*/
+        }
+
+        /* Button Style */
+        .btn-download {
+            margin-top: 30px;
+            background-color: #28a745;
+            color: #fff;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .btn-download:hover {
+            background-color: #218838;
+        }
+
+        /* Footer with signature style */
+        .footer {
+            margin-top: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #555;
+        }
+
+        .footer .signature {
+            font-style: italic;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        /* Make sure the certificate container is centered */
+        @media (max-width: 768px) {
+            .certificate-container {
+                padding: 20px;
+            }
+
+            .certificate-container h3 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/bootstrap-icons.css}" rel="stylesheet">
+</head>
+<body>
+
+<div id="main" class="container  certificate-container" style="margin-bottom: 20px">
+    <!-- Logo at the top -->
+    <img src="https://img5.thuthuatphanmem.vn/uploads/2021/07/14/logo-dai-hoc-hutech_012634748.png"
+         alt="Logo HUTECH">
+
+    <!-- Main Heading -->
+    <h3>KHOA CÔNG NGHỆ THÔNG TIN</h3>
+    <h4>Trao</h4>
+    <h6>Giấy chứng nhận</h6>
+
+    <!-- Student Information -->
+    <p style="font-size: 1.5em; color: #007bff;">
+        <strong><span th:text="${nameMember}">Nguyễn Đình Tuấn</span></strong>
+    </p>
+    <p><strong>MSSV: </strong> <span th:text="${mssv}">2180608654</span></p>
+    <p>
+    <span th:text="${team.noFinal == 1 ? 'ĐẠT GIẢI NHẤT'
+                      : (team.noFinal == 2 ? 'ĐẠT GIẢI NHÌ'
+                      : (team.noFinal == 3 || team.noFinal == 4 ? 'ĐẠT GIẢI BA'
+                      : 'Đã tham gia hội thao'))}"></span>
+    </p>
+
+    <!-- Participation and Rank Information -->
+    <p>
+    <span th:text="'BỘ MÔN ' + ${#strings.toUpperCase(team.sport.sportName)} + '  ' + ${#strings.toUpperCase(team.sport.academicYear.event.eventName)} +' '+ ${#strings.toUpperCase(team.sport.academicYear.nameAcademicYear)}">
+        MÔN BÓNG ĐÁ HỘI NGHỊ TỔNG KẾT NĂM HỌC 2023-2024
+    </span>
+    </p>
+
+
+
+    <!-- Footer with Signature -->
+    <div class="footer" style=" margin-right: 15px;">
+        <div>Trường Đại học Công nghệ HUTECH</div>
+        <div class="signature">
+        <span th:text="'TP. Hồ Chí Minh, ngày ' + ${#temporals.format(team.sport.endDate, 'dd')} + ' tháng ' + ${#temporals.format(team.sport.endDate, 'MM')} + ' năm ' + ${#temporals.format(team.sport.endDate, 'yyyy')}">
+            TP. Hồ Chí Minh, ngày 23 tháng 11 năm 2024
+        </span>
+        </div>
+    </div>
+
+</div>
+
+<div class="d-flex justify-content-center">
+    <a class="btn-download text-decoration-none text-white" style="clear: both"
+       href="#"
+       id="button-download"
+    >
+        <!--           th:href="@{/downloadCertificate/{teamId}(teamId=${team.id})}"-->
+        Tải giấy chứng nhận
+    </a>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script>
+    $("a.btn-download").click(function (e) {
+        const prtContent = $("html")[0];
+        const WinPrint = window.open('', '');
+        WinPrint.document.write(prtContent.innerHTML);
+        WinPrint.document.getElementById("button-download").remove()
+        WinPrint.document.close();
+        WinPrint.focus();
+        WinPrint.print();
+        // WinPrint.close();
+    })
+</script>
+
+</body>
+</html>
